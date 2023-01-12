@@ -1,0 +1,24 @@
+import { DocumentId, tDataTransformed, tFirestoreQueryItemData } from "../types/model";
+
+export const fsArr2Dic = <T extends any>(arr: tDataTransformed<T>[]): Record<DocumentId, tDataTransformed<T>> => {
+  const res: Record<DocumentId, tDataTransformed<any>> = {};
+  arr.forEach(({ _id, ...data }) => {
+    res[_id] = {
+      ...data,
+      _id,
+    }
+  });
+  return res;
+}
+
+export const firstDataTransformedItem = <T extends any>(record: Record<DocumentId, tDataTransformed<T>>): tDataTransformed<T> | undefined => {
+  if (Object.keys(record).length === 0) return undefined;
+  return record[Object.keys(record)[0]];
+}
+
+export const errorQuery = <T extends any>(rootLocale: string) => (messageId: string = 'notfound'): tFirestoreQueryItemData<T> => {
+  return {
+    isError: true,
+    errorMessageId: `${rootLocale}.${messageId}`,
+  };
+}

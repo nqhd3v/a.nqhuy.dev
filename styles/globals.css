@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+* {
+  @apply p-0 m-0 box-border;
+  font-family: Nunito, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+}
+
+a:not(.custom) {
+  @apply relative text-inherit font-bold text-blue-500
+    after:content-[''] after:absolute after:h-0.5 after:bg-blue-300 dark:after:bg-blue-400 after:duration-300 after:-bottom-0.5 after:left-0
+    after:w-0 hover:after:w-full;
+  text-decoration: none;
+}
+
+code, .code, code *, .code *, input.code-var-define {
+  font-family: "Ubuntu Mono", Nunito, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+  Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+  @apply text-blue-900 dark:text-blue-100;
+}
+code span.var, .code span.var {
+  @apply text-purple-600 dark:text-purple-500;
+}
+code span.class, .code span.class {
+  @apply text-yellow-600 dark:text-yellow-500;
+}
+code span.operator, .code span.operator {
+  @apply text-blue-500 dark:text-blue-600;
+}
+code span.func, .code span.func {
+  @apply text-green-500 dark:text-green-600;
+}
+
+code.comment, .code.comment, code.comment *, .code.comment * {
+  @apply text-gray-400 dark:text-gray-500;
+}
+code.comment, .code.comment {
+  @apply before:content-["//"] before:pr-2;
+}
+code.comment a:not(.custom), .code.comment a:not(.custom) {
+  @apply text-gray-500 dark:text-gray-400 font-bold
+    after:h-px after:bg-gray-600 dark:after:bg-gray-500;
+}
+
+input:disabled {
+  @apply text-opacity-70 placeholder:text-gray-300 dark:placeholder:text-gray-600 cursor-not-allowed;
+}
+
+button.run {
+  @apply w-full h-10 rounded-md
+    border border-gray-400 dark:border-gray-600
+    bg-light dark:bg-dark duration-300
+    hover:bg-blue-100 dark:hover:bg-blue-900;
+}

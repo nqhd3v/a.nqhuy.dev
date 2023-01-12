@@ -1,0 +1,5 @@
+.react-datepicker-wrapper .react-datepicker__input-container input {
+  @apply w-full px-2 py-1 rounded-sm outline-none h-9 border border-gray-400 dark:border-gray-600 bg-light dark:bg-dark;
+}
+
+/* .react-datepicker-popper .react-datepicker */
