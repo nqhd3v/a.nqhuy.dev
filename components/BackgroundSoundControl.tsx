@@ -1,12 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useCustomCursor } from './CustomCursor/CustomCursorContext';
 
 interface IBackgroundSoundControl {
   className?: string;
 }
 
 const BackgroundSoundControl: React.FC<IBackgroundSoundControl> = ({ className }) => {
-  const { setMode, setType } = useCustomCursor();
   const audioRef: any = useRef();
   const [isPlaying, setPlaying] = useState<boolean>(false);
 
@@ -35,14 +33,6 @@ const BackgroundSoundControl: React.FC<IBackgroundSoundControl> = ({ className }
       </audio>
       <div
         className={`btn-circle p-2 flex justify-center items-center cursor-pointer ${className || ''}`}
-        onMouseEnter={() => {
-          setMode("link");
-          setType(isPlaying ? "musicOff" : "musicOn");
-        }}
-        onMouseLeave={() => {
-          setMode("default");
-          setType("none");
-        }}
         onClick={togglePlay}
       >
         <div className="h-7 w-7">
