@@ -10,7 +10,7 @@ const ERROR_MAPPING: Record<string, string> = {
   'shortenLink.require-passCode': 'Input your pass-code to open your link!',
   'shortenLink.notfound': 'Your link is expired or not existed!',
   'cipher.input-invalid': 'Your pass-code is wrong!',
-  'cipher.invalid-world-array': 'Your pass-code is wrong!',
+  'cipher.invalid-word-array': 'Your pass-code is wrong!',
 };
 
 const Wrapper: React.FC<{ icon: string, children: null | string | JSX.Element | (null | JSX.Element)[] }> = ({ icon, children }) => {

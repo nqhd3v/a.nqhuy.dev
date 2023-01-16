@@ -2,6 +2,7 @@ import { DocumentReference, getDoc, setDoc, where } from "firebase/firestore";
 import { decryptAES, encryptAES } from "../../func/cipher";
 import { errorQuery, firstDataTransformedItem } from "../../func/mapping";
 import { randomPassCode, randomShortenLinkId } from "../../func/random";
+import { tShortLinkD2O } from "../../types/dto";
 import { DocumentId, tDataTransformed, tFirestoreQueryItemData, tFirestoreQueryItemTransformedData, tShortenLink } from "../../types/model";
 import { date2FsTimestamp, fsAdd, fsRead, fsReadWithCond, fsRemoveByRef } from "../firestore";
 
@@ -13,7 +14,10 @@ export const getLinkById = async (shortId: string, passCode?: string): Promise<t
   try {
     // Find with shortId with `availableUntil` is NULL
     const shortenLinkWithNullAvailable = await fsReadWithCond<tShortenLink>(
-      [ where('shortId', '==', shortId), where('availableUntil', '==', null) ],
+      [
+        where('shortId', '==', shortId),
+        where('availableUntil', '==', null),
+      ],
       ROOT_COLLECTION_KEY,
     );
     const shortenLinkWithAvailableUntil = await fsReadWithCond<tShortenLink>(
@@ -42,7 +46,13 @@ export const getLinkById = async (shortId: string, passCode?: string): Promise<t
           errorMessageId: linkNeedOpen.error,
         };
       }
-      shortenLinkTransformed.data.longLink = linkNeedOpen.data as string;
+      if (!linkNeedOpen.data) {
+        return {
+          isError: true,
+          errorMessageId: 'exception.sample.data-empty',
+        };
+      }
+      shortenLinkTransformed.data.longLink = linkNeedOpen.data.link as string;
     }
 
     return { data: shortenLinkTransformed };
@@ -55,17 +65,17 @@ export const getLinkById = async (shortId: string, passCode?: string): Promise<t
   }
 }
 
-export const createLink = async (link: string, passCode?: string, expiredAt?: Date): Promise<tFirestoreQueryItemData<tDataTransformed<tShortenLink>>> => {
+export const createLink = async ({ longLink, passCode, expiredTime }: tShortLinkD2O): Promise<tFirestoreQueryItemData<tDataTransformed<tShortenLink>>> => {
   try {
     const shortLinkData: tShortenLink = {
       shortId: randomShortenLinkId(),
-      longLink: link,
+      longLink,
       passCode: null,
-      availableUntil: expiredAt ? date2FsTimestamp(expiredAt) : null,
+      availableUntil: expiredTime ? date2FsTimestamp(expiredTime) : null,
     }
     if (passCode) {
       const randomCipher = randomPassCode();
-      const longLinkEncrypted = encryptAES(link, [passCode, randomCipher]);
+      const longLinkEncrypted = encryptAES({ link: longLink }, [passCode, randomCipher]);
       shortLinkData.passCode = randomCipher;
       shortLinkData.longLink = longLinkEncrypted;
     }
@@ -77,7 +87,7 @@ export const createLink = async (link: string, passCode?: string, expiredAt?: Da
       data: res,
     };
   } catch (err: any) {
-    console.error('Error when creating a shorten link:', [link, passCode, expiredAt], err);
+    console.error('Error when creating a shorten link:', [longLink, passCode, expiredTime], err);
     return error('unknown');
   }
 }

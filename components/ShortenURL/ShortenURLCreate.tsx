@@ -5,10 +5,12 @@ import ReactDatePicker from "react-datepicker";
 import { URL_REGEX } from "../../utils/constants";
 import { createLink } from "../../utils/Firebase/services/shortenLinks";
 import Input from "../Input";
+import InputNumber from "../InputNumber";
 
 const ShortenURLCreate = () => {
   const [linkOutput, setLinkOutput] = useState<string>('');
   const [longLink, setLongLink] = useState<string>('');
+  const [timesAccess, setTimesAccess] = useState<number>(0);
   const [passCode, setPassCode] = useState<string>('');
   const [expireTime, setExpireTime] = useState<Date | null>(null);
   const [linkSafeState, setLinkSafeState] = useState<boolean | undefined>(undefined);
@@ -50,7 +52,12 @@ const ShortenURLCreate = () => {
       return;
     }
     try {
-      const res = await createLink(longLink, passCode, expireTime || undefined);
+      const res = await createLink({
+        longLink,
+        passCode,
+        expiredTime: expireTime || undefined,
+        accessTimes: timesAccess || 0,
+      });
       if (res.isError) {
         return;
       }
@@ -109,16 +116,14 @@ const ShortenURLCreate = () => {
       )}
 
       <div className="code comment">-- Input your pass-code here (disabled)</div>
-      <div className="code comment -mt-1">This feature is <b>not ready to use!</b></div>
       <Input
         placeholder="pass_code ="
         value={passCode}
         onChange={v => setPassCode(v)}
-        disabled
       />
-      {/* <div className="code comment mb-3">Your pass-code can only contain letters and numbers</div> */}
+      <div className="code comment mb-3">Your pass-code can only contain letters and numbers</div>
 
-      <div className="code comment mt-3">-- Input your time to expire your link here (optional)</div>
+      <div className="code comment">-- Input your time to expire your link here (optional)</div>
       <ReactDatePicker
         selected={expireTime}
         onChange={d => setExpireTime(d)}
@@ -127,6 +132,14 @@ const ShortenURLCreate = () => {
         placeholderText="dd/mm/yyyy"
       />
       <div className="code comment mb-3">empty if no expire this link</div>
+
+      <div className="code comment">-- Input your times access available (optional)</div>
+      <InputNumber
+        placeholder="times_access_available ="
+        value={timesAccess}
+        onChange={v => {setTimesAccess(!v ? 0 : v);}}
+      />
+      <div className="code comment mb-3">empty if no limit times</div>
       
       <button
         className="run"
