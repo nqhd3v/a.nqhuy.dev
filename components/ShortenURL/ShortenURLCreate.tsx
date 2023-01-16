@@ -56,7 +56,6 @@ const ShortenURLCreate = () => {
         longLink,
         passCode,
         expiredTime: expireTime || undefined,
-        accessTimes: timesAccess || 0,
       });
       if (res.isError) {
         return;
