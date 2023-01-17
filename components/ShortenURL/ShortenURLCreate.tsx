@@ -10,7 +10,6 @@ import InputNumber from "../InputNumber";
 const ShortenURLCreate = () => {
   const [linkOutput, setLinkOutput] = useState<string>('');
   const [longLink, setLongLink] = useState<string>('');
-  const [timesAccess, setTimesAccess] = useState<number>(0);
   const [passCode, setPassCode] = useState<string>('');
   const [expireTime, setExpireTime] = useState<Date | null>(null);
   const [linkSafeState, setLinkSafeState] = useState<boolean | undefined>(undefined);
@@ -131,14 +130,6 @@ const ShortenURLCreate = () => {
         placeholderText="dd/mm/yyyy"
       />
       <div className="code comment mb-3">empty if no expire this link</div>
-
-      <div className="code comment">-- Input your times access available (optional)</div>
-      <InputNumber
-        placeholder="times_access_available ="
-        value={timesAccess}
-        onChange={v => {setTimesAccess(!v ? 0 : v);}}
-      />
-      <div className="code comment mb-3">empty if no limit times</div>
       
       <button
         className="run"
