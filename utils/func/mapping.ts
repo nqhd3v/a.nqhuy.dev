@@ -22,3 +22,15 @@ export const errorQuery = <T extends any>(rootLocale: string) => (messageId: str
     errorMessageId: `${rootLocale}.${messageId}`,
   };
 }
+
+export const mapLength = (mapping: Record<string, any>, deep?: boolean): number => Object.keys(mapping).filter(k => {
+  if (deep) {
+    if (Array.isArray(mapping[k])) {
+      return mapping[k].length > 0 ? mapping[k] : undefined;
+    }
+    if (mapping[k] instanceof Object) {
+      return mapLength(mapping[k], deep) > 0 ? mapping[k] : undefined;
+    }
+  }
+  return mapping[k]
+}).length;

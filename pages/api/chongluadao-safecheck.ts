@@ -3,10 +3,6 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import axios from 'axios';
 import { tApiError } from '../../utils/types/api';
 
-type Data = {
-  name: string
-}
-
 const CHONGLUADAO_SAFECHECK_API = 'https://api.chongluadao.vn/v1/safecheck';
 
 export default async function handler(

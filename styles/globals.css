@@ -28,8 +28,15 @@ code span.var, .code span.var {
 code span.class, .code span.class {
   @apply text-yellow-600 dark:text-yellow-500;
 }
+code span.str, .code span.str {
+  @apply text-orange-400 dark:text-orange-300
+    before:content-['"'] after:content-['"'];
+}
 code span.operator, .code span.operator {
   @apply text-blue-500 dark:text-blue-600;
+}
+code span.def, .code span.def {
+  @apply text-gray-500 dark:text-gray-400 italic;
 }
 code span.func, .code span.func {
   @apply text-green-500 dark:text-green-600;
@@ -46,8 +53,18 @@ code.comment a:not(.custom), .code.comment a:not(.custom) {
     after:h-px after:bg-gray-600 dark:after:bg-gray-500;
 }
 
+input[data-error="true"] {
+  @apply border-red-400 dark:border-red-600;
+}
 input:disabled {
   @apply text-opacity-70 placeholder:text-gray-300 dark:placeholder:text-gray-600 cursor-not-allowed;
+}
+
+ul.input-error {
+  @apply mt-1;
+}
+ul.input-error li {
+  @apply text-sm text-red-400 dark:text-red-600 relative pl-4 before:content-['-'] before:absolute before:top-0 before:left-1;
 }
 
 button.run {
@@ -55,4 +72,7 @@ button.run {
     border border-gray-400 dark:border-gray-600
     bg-light dark:bg-dark duration-300
     hover:bg-blue-100 dark:hover:bg-blue-900;
+}
+button:disabled.run {
+  @apply opacity-40 hover:bg-light dark:hover:bg-dark cursor-not-allowed;
 }

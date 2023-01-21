@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
+import { tFormRule } from "./Form/types";
 
-interface iInput {
+export interface iInput {
+  name?: string;
   className?: string;
   placeholder?: string;
   value?: string;
@@ -8,10 +10,15 @@ interface iInput {
   prefix?: string;
   onChange?: (value: string) => Promise<void> | void;
   onBlur?: (currentValue: string) => Promise<void> | void;
-  appendIcon?: JSX.Element;
+  appendIcon?: JSX.Element | "password";
+  onAppendIconClick?: () => void;
+  errors?: string[];
+  rules?: tFormRule[];
+  hideErrorMessage?: boolean;
 }
 
 const Input: React.FC<iInput> = ({
+  name,
   value,
   placeholder,
   className,
@@ -20,8 +27,12 @@ const Input: React.FC<iInput> = ({
   disabled,
   prefix,
   appendIcon,
+  onAppendIconClick,
+  errors,
+  hideErrorMessage,
 }) => {
   const [localValue, setLocalValue] = useState<string>('');
+  const [showPass, setShowPass] = useState<boolean>(false);
 
   // Update local if global change
   useEffect(() => {
@@ -36,35 +47,59 @@ const Input: React.FC<iInput> = ({
   }
 
   const prefixStyle = (!!prefix ? { paddingLeft: `${8 * (prefix.length + 1)}px` } : {});
+  const passIcon = showPass ? <i className="fa-solid fa-eye"></i> : <i className="fa-solid fa-eye-slash"></i>;
+
+  const errorContent = () => {
+    if (hideErrorMessage || !Array.isArray(errors) || errors.length === 0) {
+      return null;
+    }
+    return (
+      <ul className="input-error">
+        {errors.map(err => <li key={err}>{err}</li>)}
+      </ul>
+    )
+  }
 
   return (
-    <div className="relative">
-      <input
-        type="text"
-        value={localValue}
-        onChange={({ target }) => disabled ? null : handleChangeValue(target.value)}
-        placeholder={placeholder || placeholder !== undefined ? placeholder : 'Input here'}
-        className={
-          'w-full px-2 py-1 rounded-sm outline-none ' +
-          'h-9 border border-gray-400 dark:border-gray-600 ' +
-          'bg-light dark:bg-dark ' +
-          (!!appendIcon ? 'pr-9 ' : '') +
-          (className || '')
-        }
-        onBlur={() => onBlur?.(localValue)}
-        disabled={disabled}
-        style={prefixStyle}
-      />
-      {!!prefix ? (
-        <div className="text-base code absolute h-7 left-1 top-1 leading-7 pointer-events-none !text-blue-400 dark:!text-gray-600">
-          {prefix}
-        </div>
-      ) : null}
-      {!!appendIcon ? (
-        <div className="absolute h-7 w-7 right-1 top-1 rounded-sm flex justify-center items-center pointer-events-none">
-          {appendIcon}
-        </div>
-      ) : null}
+    <div className={`relative ${(className || '')}`}>
+      <div className="relative">
+        <input
+          name={name}
+          type={appendIcon === "password" && !showPass ? "password" : "text"}
+          value={localValue}
+          onChange={({ target }) => disabled ? null : handleChangeValue(target.value)}
+          placeholder={placeholder || placeholder !== undefined ? placeholder : 'Input here'}
+          className={
+            'w-full px-2 py-1 rounded-sm outline-none ' +
+            'h-9 border border-gray-400 dark:border-gray-600 ' +
+            'bg-light dark:bg-dark ' +
+            (!!appendIcon ? 'pr-9 ' : '')
+          }
+          onBlur={() => onBlur?.(localValue)}
+          disabled={disabled}
+          style={prefixStyle}
+          autoComplete="off"
+          data-error={(errors || []).length > 0 ? true : false}
+        />
+        {!!prefix ? (
+          <div className="text-base code absolute h-7 left-1 top-1 leading-7 pointer-events-none !text-blue-400 dark:!text-gray-600">
+            {prefix}
+          </div>
+        ) : null}
+        {!!appendIcon ? (
+          <div
+            className={
+              "absolute h-7 w-7 right-1 top-1 rounded-sm flex justify-center items-center " +
+              ((appendIcon === "password" || !!onAppendIconClick) ? "cursor-pointer  " : "pointer-events-none ") +
+              (disabled ? "opacity-30 pointer-events-none " : "")
+            }
+            onClick={() => appendIcon === "password" ? setShowPass(!showPass) : onAppendIconClick?.()}
+          >
+            {appendIcon === "password" ? passIcon : appendIcon}
+          </div>
+        ) : null}
+      </div>
+      {errorContent()}
     </div>
   )
 }

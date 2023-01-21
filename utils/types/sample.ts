@@ -1,3 +1,3 @@
 export type tComponentWrapper = {
-  children: JSX.Element[] | JSX.Element;
+  children: (JSX.Element | string | number)[] | JSX.Element | string | number;
 }

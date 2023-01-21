@@ -3,8 +3,8 @@ import { decryptAES, encryptAES } from "../../func/cipher";
 import { errorQuery, firstDataTransformedItem } from "../../func/mapping";
 import { randomPassCode, randomShortenLinkId } from "../../func/random";
 import { tShortLinkD2O } from "../../types/dto";
-import { DocumentId, tDataTransformed, tFirestoreQueryItemData, tFirestoreQueryItemTransformedData, tShortenLink } from "../../types/model";
-import { date2FsTimestamp, fsAdd, fsRead, fsReadWithCond, fsRemoveByRef } from "../firestore";
+import { tDataTransformed, tFirestoreQueryItemData, tShortenLink } from "../../types/model";
+import { date2FsTimestamp, fsAdd, fsReadWithCond, fsRemoveByRef } from "../firestore";
 
 const ROOT_COLLECTION_KEY = "shorten_links";
 

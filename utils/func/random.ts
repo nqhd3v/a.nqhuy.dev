@@ -7,6 +7,8 @@ export const randomPassCode = (): string => {
   return customAlphabet(AZ09)(5);
 }
 
+export const randomStr = (length: number = 5) => customAlphabet(az09)(length);
+
 export const randomShortenLinkId = () => {
   return customAlphabet(az09)(6);
 }
