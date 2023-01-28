@@ -26,7 +26,7 @@ function MyApp({ Component, pageProps, router }: AppProps) {
 
     // Disable log in production mode.
     if (process.env.NODE_ENV === "production") {
-      console.log('Disabled log in production mode!');
+      console.info('Disabled log in production mode!');
       GlobalDebug(false);
     }
   }, []);

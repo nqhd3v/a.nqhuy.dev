@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { tFormRule } from "./Form/types";
+import ErrorBoundary from "./wrapper/ErrorBoundary";
 
 export interface iInput {
   name?: string;
   className?: string;
+  inputClassName?: string;
   placeholder?: string;
   value?: string;
   disabled?: boolean;
@@ -22,6 +24,7 @@ const Input: React.FC<iInput> = ({
   value,
   placeholder,
   className,
+  inputClassName,
   onChange,
   onBlur,
   disabled,
@@ -31,13 +34,13 @@ const Input: React.FC<iInput> = ({
   errors,
   hideErrorMessage,
 }) => {
-  const [localValue, setLocalValue] = useState<string>('');
+  const [localValue, setLocalValue] = useState<string>(value || '');
   const [showPass, setShowPass] = useState<boolean>(false);
 
   // Update local if global change
   useEffect(() => {
-    if (localValue !== value && value !== undefined) {
-      setLocalValue(value);
+    if (localValue !== value) {
+      setLocalValue(value || '');
     }
   }, [value]);
 
@@ -61,46 +64,49 @@ const Input: React.FC<iInput> = ({
   }
 
   return (
-    <div className={`relative ${(className || '')}`}>
-      <div className="relative">
-        <input
-          name={name}
-          type={appendIcon === "password" && !showPass ? "password" : "text"}
-          value={localValue}
-          onChange={({ target }) => disabled ? null : handleChangeValue(target.value)}
-          placeholder={placeholder || placeholder !== undefined ? placeholder : 'Input here'}
-          className={
-            'w-full px-2 py-1 rounded-sm outline-none ' +
-            'h-9 border border-gray-400 dark:border-gray-600 ' +
-            'bg-light dark:bg-dark ' +
-            (!!appendIcon ? 'pr-9 ' : '')
-          }
-          onBlur={() => onBlur?.(localValue)}
-          disabled={disabled}
-          style={prefixStyle}
-          autoComplete="off"
-          data-error={(errors || []).length > 0 ? true : false}
-        />
-        {!!prefix ? (
-          <div className="text-base code absolute h-7 left-1 top-1 leading-7 pointer-events-none !text-blue-400 dark:!text-gray-600">
-            {prefix}
-          </div>
-        ) : null}
-        {!!appendIcon ? (
-          <div
+    <ErrorBoundary>
+      <div className={`relative ${(className || '')}`}>
+        <div className="relative">
+          <input
+            name={name}
+            type={appendIcon === "password" && !showPass ? "password" : "text"}
+            value={localValue}
+            onChange={({ target }) => disabled ? null : handleChangeValue(target.value)}
+            placeholder={placeholder || placeholder !== undefined ? placeholder : 'Input here'}
             className={
-              "absolute h-7 w-7 right-1 top-1 rounded-sm flex justify-center items-center " +
-              ((appendIcon === "password" || !!onAppendIconClick) ? "cursor-pointer  " : "pointer-events-none ") +
-              (disabled ? "opacity-30 pointer-events-none " : "")
+              'w-full px-2 py-1 rounded-sm outline-none ' +
+              'h-10 border border-gray-400 dark:border-gray-600 ' +
+              'bg-light dark:bg-dark text-dark dark:text-light' +
+              (!!appendIcon ? 'pr-9 ' : '') +
+              (inputClassName || '')
             }
-            onClick={() => appendIcon === "password" ? setShowPass(!showPass) : onAppendIconClick?.()}
-          >
-            {appendIcon === "password" ? passIcon : appendIcon}
-          </div>
-        ) : null}
+            onBlur={() => onBlur?.(localValue)}
+            disabled={disabled}
+            style={prefixStyle}
+            autoComplete="off"
+            data-error={(errors || []).length > 0 ? true : false}
+          />
+          {!!prefix ? (
+            <div className="text-base code absolute h-7 left-1 top-1 leading-7 pointer-events-none !text-blue-400 dark:!text-gray-600">
+              {prefix}
+            </div>
+          ) : null}
+          {!!appendIcon ? (
+            <div
+              className={
+                "absolute h-7 w-7 right-1 top-1.5 rounded-sm flex justify-center items-center " +
+                ((appendIcon === "password" || !!onAppendIconClick) ? "cursor-pointer  " : "pointer-events-none ") +
+                (disabled ? "opacity-30 pointer-events-none " : "")
+              }
+              onClick={() => appendIcon === "password" ? setShowPass(!showPass) : onAppendIconClick?.()}
+            >
+              {appendIcon === "password" ? passIcon : appendIcon}
+            </div>
+          ) : null}
+        </div>
+        {errorContent()}
       </div>
-      {errorContent()}
-    </div>
+    </ErrorBoundary>
   )
 }
 

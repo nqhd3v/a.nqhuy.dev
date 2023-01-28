@@ -23,13 +23,13 @@ const FirebaseAuth: React.FC<iFirebaseAuth> = ({
   const [handling, setHandling] = useState<boolean>(false);
   const [error, setError] = useState<string | undefined>(undefined);
 
-  const { user, loading: userLoading } = useFirebaseAuth();
+  const { isAuthenticated, isAuthenticating: userLoading } = useFirebaseAuth();
 
   useEffect(() => {
-    if (user && !userLoading) {
+    if (isAuthenticated && !userLoading) {
       router.push(redirectIfSuccess);
     }
-  }, [user, userLoading])
+  }, [isAuthenticated, userLoading])
 
   return (
     <div className="relative w-full max-w-[400px] p-5 rounded-md bg-light dark:bg-dark border border-gray-400 dark:border-gray-600">

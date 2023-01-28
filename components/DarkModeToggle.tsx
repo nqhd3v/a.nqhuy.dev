@@ -9,11 +9,11 @@ const isDarkModeActivated = (): boolean =>
 
 const getThemeString = (isDark: boolean): string => (isDark ? 'dark' : 'light')
 
-interface IDarkModeToggle {
+interface iDarkModeToggle {
   className?: string;
 }
 
-const DarkModeToggle: React.FC<IDarkModeToggle> = ({ className }) => {
+const DarkModeToggle: React.FC<iDarkModeToggle> = ({ className }) => {
   const [isDarkMode, setDarkMode] = useState<boolean>(false);
 
   const toggleMode = (): void => {
@@ -57,4 +57,4 @@ const DarkModeToggle: React.FC<IDarkModeToggle> = ({ className }) => {
   )
 }
 
-export default DarkModeToggle
+export default DarkModeToggle;

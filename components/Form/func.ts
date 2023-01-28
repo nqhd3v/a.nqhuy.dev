@@ -7,6 +7,7 @@ type tValidated = {
 export const isFormValidated = (
   values: Record<string, any>,
   rules: Record<string, tFormRule[]>,
+  validateByValues?: boolean
 ): tValidated => {
   const errors: Record<string, string[]> = {};
   let isHasError = false;
@@ -15,11 +16,30 @@ export const isFormValidated = (
       return;
     }
     const valueItem = values[field];
+    if (!valueItem && validateByValues) {
+      return;
+    }
     rules[field].forEach(rule => {
       if (!Array.isArray(errors[field])) {
         errors[field] = [];
       }
-      if (rule.required && (valueItem === undefined || valueItem === "")) {
+      if (
+        rule.required &&
+        (
+          valueItem === undefined ||
+          (
+            typeof valueItem === "string" &&
+            (
+              valueItem === "" ||
+              valueItem.trim() === ""
+            )
+          ) ||
+          (
+            typeof valueItem === "object" &&
+            Object.keys(valueItem).filter(k => valueItem[k]).length < Object.keys(valueItem).length
+          )
+        )
+      ) {
         errors[field].push(`Field '${field}' is required!`);
       }
       if (rule.regex && typeof valueItem === "string" && !rule.regex.test(valueItem)) {

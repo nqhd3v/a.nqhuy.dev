@@ -1,4 +1,3 @@
-import moment from "moment";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { useFirebaseAuth, withFirebaseAuth } from "../../components/Firebase/FirebaseAuthWrapper";
@@ -16,7 +15,7 @@ const AuthValue = ({ name, value }: { name: string, value: string | undefined | 
 
 const AuthInfo = () => {
   const router = useRouter();
-  const { user, loading } = useFirebaseAuth();
+  const { user, isAuthenticating: loading } = useFirebaseAuth();
 
   useEffect(() => {
     if (!user && !loading) {
@@ -54,16 +53,13 @@ const AuthInfo = () => {
         <div className="p-5 border border-gray-400 dark:border-gray-600 rounded-md">
           <div className="code comment">
             {'user info '}
-            {user.metadata.lastSignInTime ? ` - logged in at "${moment(user.metadata.lastSignInTime).format('DD/MM/YYYY HH:mm:ss')}"` : ''}
           </div>
-          <AuthValue name="displayName" value={user.displayName} />
-          <AuthValue name="email" value={user.email} />
-          <div className="code comment">auth info</div>
-          <AuthValue name="provider" value={user.providerData[0]?.providerId} />
+          <AuthValue name="displayName" value={user.data.displayName} />
+          <AuthValue name="email" value={user.data.email} />
         </div>
       </div>
     </LayoutAnimated>
   )
 };
 
-export default withFirebaseAuth<any>(AuthInfo);
+export default withFirebaseAuth(AuthInfo);

@@ -9,6 +9,23 @@ export type tShortenLink = {
   availableUntil: Timestamp | null;
 }
 
+export type tUser = {
+  email: string | null;
+  displayName: string;
+  photoURL: string | null;
+  joinedAt: Timestamp;
+}
+
+export type tActivityTracking = {
+  name: string;
+  code: string;
+  createdBy: DocumentReference;
+  participants: DocumentReference[];
+  createdAt: Timestamp;
+  startedAt: Timestamp;
+  finishedAt: Timestamp;
+}
+
 export type tFirestoreQueryItemData<Type> = {
   data?: Type,
   errorMessageId?: string;
@@ -23,6 +40,11 @@ export type tFirestoreQueryItemTransformedData<Type> = {
 }
 export type tFirestoreQueryItemsData<Type> = {
   data?: Type[],
+  errorMessageId?: string;
+  isError?: boolean;
+}
+export type tFirestoreQueryItemsTransformedData<Type> = {
+  data?: tDataTransformed<Type>[],
   errorMessageId?: string;
   isError?: boolean;
 }

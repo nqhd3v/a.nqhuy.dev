@@ -1,16 +1,28 @@
 import { useEffect, useState } from "react";
+import { tFormRule } from "./Form/types";
+import ErrorBoundary, { withBoundary } from "./wrapper/ErrorBoundary";
 
-interface iInput {
+interface iInputWithButton {
+  name?: string;
+  className?: string;
+  inputClassName?: string;
   placeholder?: string;
   value?: string;
   disabled?: boolean;
   onChange?: (value: string) => Promise<void> | void | null;
-  onSubmit: (value: string) => Promise<void> | void | null;
+  onSubmit?: (value: string) => Promise<void> | void | null;
   onBlur?: () => Promise<void> | void | null;
-  appendIcon?: JSX.Element;
+  onAppendIconClick?: () => void;
+  appendIcon?: JSX.Element | "password";
+  errors?: string[];
+  rules?: tFormRule[];
+  hideErrorMessage?: boolean;
 }
 
-const InputWithButton: React.FC<iInput> = ({
+const InputWithButton: React.FC<iInputWithButton> = ({
+  name,
+  className,
+  inputClassName,
   value,
   placeholder,
   onChange,
@@ -18,13 +30,17 @@ const InputWithButton: React.FC<iInput> = ({
   onBlur,
   disabled,
   appendIcon,
+  onAppendIconClick,
+  errors,
+  hideErrorMessage
 }) => {
   const [localValue, setLocalValue] = useState<string>('');
+  const [showPass, setShowPass] = useState<boolean>(false);
 
   // Update local if global change
   useEffect(() => {
-    if (localValue !== value && value !== undefined) {
-      setLocalValue(value);
+    if (localValue !== value) {
+      setLocalValue(value || '');
     }
   }, [value]);
 
@@ -33,39 +49,69 @@ const InputWithButton: React.FC<iInput> = ({
     onChange?.(v);
   }
 
-  return (
-    <div className="relative">
-      <input
-        type="text"
-        value={localValue}
-        onChange={({ target }) => disabled ? null : handleChangeValue(target.value)}
-        placeholder={placeholder || 'Input here'}
-        className={
-          'w-full pl-2 pr-9 py-1 rounded-sm outline-none ' +
-          'h-9 border border-gray-400 dark:border-gray-600 ' +
-          'bg-light dark:bg-dark ' +
-          (!!appendIcon ? 'pr-18 ' : '')
-        }
-        onBlur={() => onBlur?.()}
-        disabled={disabled}
-      />
-      {!!appendIcon ? (
-        <div className="absolute h-7 w-7 right-9 top-1 rounded-sm flex justify-center items-center pointer-events-none">
-          {appendIcon}
-        </div>
-      ) : null}
+  const passIcon = showPass ? <i className="fa-solid fa-eye"></i> : <i className="fa-solid fa-eye-slash"></i>;
 
-      <div
-        className={
-          "absolute h-7 w-7 right-1 top-1 rounded flex justify-center items-center cursor-pointer " +
-          "border border-slate-400 dark:border-slate-600 bg-light dark:bg-dark duration-300 " +
-          "hover:bg-blue-200 dark:hover:bg-blue-900 "
-        }
-        onClick={() => disabled ? null : onSubmit(localValue)}
-      >
-        <i className="fa-solid fa-arrow-right" />
+  const errorContent = () => {
+    if (hideErrorMessage || !Array.isArray(errors) || errors.length === 0) {
+      return null;
+    }
+    return (
+      <ul className="input-error">
+        {errors.map(err => <li key={err}>{err}</li>)}
+      </ul>
+    )
+  }
+
+  return (
+    <ErrorBoundary>
+      <div className={`relative ${className || ""}`}>
+        <div className="relative">
+          <input
+            name={name}
+            type={appendIcon === "password" && !showPass ? "password" : "text"}
+            value={localValue}
+            onChange={({ target }) => disabled ? null : handleChangeValue(target.value)}
+            placeholder={placeholder || 'Input here'}
+            className={
+              'w-full pl-2 pr-9 py-1 rounded-sm outline-none ' +
+              'h-10 border border-gray-400 dark:border-gray-600 ' +
+              'bg-light dark:bg-dark disabled:opacity-30 ' +
+              (!!appendIcon ? 'pr-18 ' : '') +
+              (inputClassName || '')
+            }
+            onBlur={() => onBlur?.()}
+            disabled={disabled}
+            autoComplete="off"
+            data-error={(errors || []).length > 0 ? true : false}
+          />
+          {!!appendIcon ? (
+            <div
+              className={
+                "absolute h-7 w-7 right-10 top-1.5 rounded-sm flex justify-center items-center " +
+                ((appendIcon === "password" || !!onAppendIconClick) ? "cursor-pointer  " : "pointer-events-none ") +
+                (disabled ? "opacity-30 pointer-events-none " : "")
+              }
+              onClick={() => appendIcon === "password" ? setShowPass(!showPass) : onAppendIconClick?.()}
+            >
+              {appendIcon === "password" ? passIcon : appendIcon}
+            </div>
+          ) : null}
+
+          <div
+            className={
+              "absolute h-7 w-7 right-1 top-1.5 rounded flex justify-center items-center " +
+              "border border-slate-400 dark:border-slate-600 bg-light dark:bg-dark duration-300 " +
+              "hover:bg-blue-200 dark:hover:bg-blue-900 " +
+              (disabled ? "pointer-events-none opacity-30 " : "cursor-pointer ")
+            }
+            onClick={() => disabled ? null : onSubmit?.(localValue)}
+          >
+            <i className="fa-solid fa-arrow-right" />
+          </div>
+        </div>
+        {errorContent()}
       </div>
-    </div>
+    </ErrorBoundary>
   )
 }
 

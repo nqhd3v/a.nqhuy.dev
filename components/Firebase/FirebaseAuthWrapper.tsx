@@ -1,17 +1,23 @@
 import { User } from "firebase/auth";
 import React from "react";
-import { onAuthStateChanged } from "../../utils/Firebase/auth";
+import { logout, onAuthStateChanged } from "../../utils/Firebase/auth";
+import { createUserIfNotExist } from "../../utils/Firebase/services/user";
+import { tDataTransformed, tUser } from "../../utils/types/model";
 import { tComponentWrapper } from "../../utils/types/sample";
+import Authenticated from "../wrapper/Authenticated";
+import { withBoundary } from "../wrapper/ErrorBoundary";
 
 interface iFirebaseAuth {
-  user?: User;
-  loading: boolean;
-  setUser: (user?: User) => Promise<void> | void;
+  user?: tDataTransformed<tUser>;
+  isAuthenticating: boolean;
+  setUser: (user?: tDataTransformed<tUser>) => Promise<void> | void;
+  isAuthenticated: boolean;
 }
 const FirebaseAuthContext = React.createContext<iFirebaseAuth>({
   user: undefined,
-  loading: true,
+  isAuthenticating: true,
   setUser: () => undefined,
+  isAuthenticated: false,
 });
 
 export const useFirebaseAuth = () => {
@@ -19,36 +25,68 @@ export const useFirebaseAuth = () => {
 }
 
 const FirebaseAuthWrapper: React.FC<tComponentWrapper> = ({ children }) => {
-  const [loadingUser, setLoadingUser] = React.useState<boolean>(true);
-  const [currentUser, setCurrentUser] = React.useState<User | undefined>(undefined);
+  const [isAuthenticating, setAuthenticating] = React.useState<boolean>(true);
+  const [currentFirebaseAuthUser, setFirebaseAuthUser] = React.useState<User | undefined>(undefined);
+  const [currentUser, setCurrentUser] = React.useState<tDataTransformed<tUser> | undefined>(undefined);
+
+  const handleUpdateCurrentUser = async () => {
+    if (!currentFirebaseAuthUser) {
+      return;
+    }
+    const userData = await createUserIfNotExist(currentFirebaseAuthUser);
+    if (!userData) {
+      console.error('Unexpected error when create new user for first times login! Contact to admin for more information!');
+    }
+    setCurrentUser(userData);
+  }
 
   React.useEffect(() => {
-    const unsubscribe = onAuthStateChanged(user => {
-      setCurrentUser(user || undefined);
-      setLoadingUser(false);
+    const unsubscribe = onAuthStateChanged(async (user) => {
+      setFirebaseAuthUser(user || undefined);
+      if (!user) {
+        setCurrentUser(undefined);
+      }
+      setAuthenticating(false);
     });
 
     return () => {
       unsubscribe();
     }
-  })
+  });
+
+  React.useEffect(() => {
+    handleUpdateCurrentUser();
+  }, [!currentFirebaseAuthUser])
 
   return (
     <FirebaseAuthContext.Provider
       value={{
         user: currentUser,
-        loading: loadingUser,
+        isAuthenticating,
         setUser: user => setCurrentUser(user),
+        isAuthenticated: !!currentFirebaseAuthUser,
       }}
     >
       {children}
+      {!!currentUser ? (
+        <div className="fixed top-5 right-5 w-12 h-8 rounded-3xl bg-dark dark:bg-light" onClick={logout}></div>
+      ) : null}
     </FirebaseAuthContext.Provider>
   )
 };
 
-export const withFirebaseAuth = <T extends object>(Component: React.FunctionComponent<T>) => {
+export const withFirebaseAuth = <T extends object>(Component: React.FunctionComponent<T>, requireAuthenticated?: boolean, renderLoadingIfNoAuth?: boolean) => {
   class WithFirebaseAuth extends React.Component<T> {
     render() {
+      if (requireAuthenticated) {
+        return (
+          <FirebaseAuthWrapper>
+            <Authenticated renderLoadingIfNoAuth={renderLoadingIfNoAuth}>
+              <Component {...this.props as T} />
+            </Authenticated>
+          </FirebaseAuthWrapper>
+        )
+      }
       return (
         <FirebaseAuthWrapper>
           <Component {...this.props as T} />
@@ -60,4 +98,4 @@ export const withFirebaseAuth = <T extends object>(Component: React.FunctionComp
   return WithFirebaseAuth;
 }
 
-export default FirebaseAuthWrapper;
+export default withBoundary<tComponentWrapper>(FirebaseAuthWrapper);

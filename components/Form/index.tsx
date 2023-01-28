@@ -1,12 +1,16 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { withBoundary } from "../wrapper/ErrorBoundary";
 import { isFormValidated } from "./func";
-import { tFormRule } from "./types";
+import { tFormErrors, tFormRule, tFormValues } from "./types";
+import { iUseForm } from "./useForm";
 
 export interface iForm {
   children: JSX.Element[] | JSX.Element;
-  initialValues?: Record<string, any>;
-  onFinish?: (values: Record<string, any>) => Promise<void> | void;
+  initialValues?: tFormValues;
+  onFinish?: (values: tFormValues) => Promise<void> | void;
   disabled?: boolean;
+  className?: string;
+  form?: iUseForm;
 }
 
 const Form: React.FC<iForm> = ({
@@ -14,10 +18,11 @@ const Form: React.FC<iForm> = ({
   children,
   onFinish,
   disabled,
+  className,
+  form,
 }) => {
-  const formRef = useRef();
-  const [formData, setFormData] = useState<Record<string, any>>(initialValues || {});
-  const [formErr, setFormErr] = useState<Record<string, string[]>>({});
+  const [formData, setFormData] = useState<tFormValues>(initialValues || {});
+  const [formErr, setFormErr] = useState<tFormErrors>({});
 
   const childrenArr = useMemo(() => Array.isArray(children) ? children : [children], [children]);
   const inpRules = useMemo(() => {
@@ -30,21 +35,78 @@ const Form: React.FC<iForm> = ({
     return rules;
   }, [childrenArr]);
 
-  const handleChangeItem = (itemName: string) => (itemValue: any) => {
-    setFormData({
+  const handleValidate = (fieldValues?: tFormValues) => {
+    return isFormValidated(fieldValues || formData, inpRules);
+  }
+  const handleSetField = (itemName: string, itemValue: any) => {
+    const newFormData = {
       ...formData,
       [itemName]: itemValue,
-    });
+    };
+    setFormData(newFormData);
     // Revalidate form if form already error before.
-    const { errors } = isFormValidated({ [itemName]: itemValue }, inpRules);
-    setFormErr({
+    const { errors } = isFormValidated({ [itemName]: itemValue }, inpRules, true);
+    const newFormErrors = {
       ...formErr,
       [itemName]: errors[itemName],
-    });
+    };
+    setFormErr(newFormErrors);
+    return {
+      values: newFormData,
+      errors: newFormErrors,
+    }
   }
-
-  const handleFormSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
-    e.preventDefault();
+  const handleSetFields = (fieldValues: tFormValues) => {
+    const newFormData = {
+      ...formData,
+      ...fieldValues,
+    }
+    setFormData(newFormData);
+    // Revalidate form if form already error before.
+    const { errors } = isFormValidated(fieldValues, inpRules, true);
+    const newFormErrors = {
+      ...formErr,
+      ...errors,
+    }
+    setFormErr(newFormErrors);
+    return {
+      values: newFormData,
+      errors: newFormErrors,
+    }
+  }
+  const handleSetError = (field: string, errors: string[] = []): tFormErrors => {
+    const newFormErrors = {
+      ...formErr,
+      [field]: (errors.length === 0)
+        ? []
+        : [
+          ...(formErr[field] || []),
+          ...errors,
+        ]
+    };
+    setFormErr(newFormErrors);
+    return newFormErrors;
+  }
+  const handleSetErrors = (fieldErrors: tFormErrors): tFormErrors => {
+    const fieldErrorUpdated: tFormErrors = {};
+    Object.keys(fieldErrors).forEach(f => {
+      fieldErrorUpdated[f] = {
+        ...(formErr[f] || {}),
+        ...fieldErrors[f]
+      };
+    })
+    const newFormErrors = {
+      ...formErr,
+      ...fieldErrorUpdated,
+    };
+    setFormErr(newFormErrors);
+    return newFormErrors;
+  }
+  const handleFormReset = () => {
+    setFormData(initialValues || {});
+    setFormErr({});
+  }
+  const handleFormSubmit = async () => {
     // Validate data
     const { isHasError, errors } = isFormValidated(formData, inpRules);
     if (isHasError) {
@@ -54,14 +116,29 @@ const Form: React.FC<iForm> = ({
     setFormErr({});
 
     // Submit data
-    onFinish?.(formData);
+    await onFinish?.(formData);
+  }
+
+  // Pass form's func to useForm's func
+  if (form) {
+    form.setField = handleSetField;
+    form.setFields = handleSetFields;
+    form.setFieldError = handleSetError;
+    form.setFieldErrors = handleSetErrors;
+    form.validate = handleValidate;
+    form.submit = handleFormSubmit;
+    form.reset = handleFormReset;
   }
 
   return (
     <form
-      ref={formRef.current}
-      onSubmit={e => handleFormSubmit(e)}
+      onSubmit={e => {
+        e.preventDefault();
+        handleFormSubmit();
+      }}
+      onReset={() => handleFormReset()}
       autoComplete="off"
+      className={className}
     >
       {childrenArr.map(childEle => {
         if (!React.isValidElement(childEle)) {
@@ -69,7 +146,7 @@ const Form: React.FC<iForm> = ({
           return null;
         }
         const { name: childTypeName } = childEle.type as any;
-        const { name, type: childPropsType } = childEle.props as any;
+        const { name, type: childPropsType, disabled: childPropsDisabled } = childEle.props as any;
         if (childTypeName === "Input") {
           if (!name) {
             console.error('Form - Input - Input element required name prop:', childEle);
@@ -77,16 +154,56 @@ const Form: React.FC<iForm> = ({
           }
           return React.cloneElement<any>(childEle, {
             errors: formErr[name] || [],
-            onChange: (v: any) => handleChangeItem(name)(v),
+            onChange: (v: any) => handleSetField(name, v),
             value: formData[name],
             key: `${childTypeName}:${name}`,
-            disabled,
+            disabled: disabled || childPropsDisabled,
+          });
+        }
+        if (childTypeName === "InputWithButton") {
+          if (!name) {
+            console.error('Form - InputWithButton - Input element required name prop:', childEle);
+            return childEle;
+          }
+          return React.cloneElement<any>(childEle, {
+            errors: formErr[name] || [],
+            onChange: (v: any) => handleSetField(name, v),
+            onSubmit: () => handleFormSubmit(),
+            value: formData[name],
+            key: `${childTypeName}:${name}`,
+            disabled: disabled || childPropsDisabled,
+          });
+        }
+        if (childTypeName === "InputDate") {
+          if (!name) {
+            console.error('Form - InputDate - Input element required name prop:', childEle);
+            return childEle;
+          }
+          return React.cloneElement<any>(childEle, {
+            errors: formErr[name] || [],
+            onChange: (v: any) => handleSetField(name, v),
+            selected: formData[name],
+            key: `${childTypeName}:${name}`,
+            disabled: disabled || childPropsDisabled,
+          });
+        }
+        if (childTypeName === "InputDateRange") {
+          if (!name) {
+            console.error('Form - InputDateRange - Input element required name prop:', childEle);
+            return childEle;
+          }
+          return React.cloneElement<any>(childEle, {
+            errors: formErr[name] || [],
+            onChange: (v: any) => handleSetField(name, v),
+            value: formData[name],
+            key: `${childTypeName}:${name}`,
+            disabled: disabled || childPropsDisabled,
           });
         }
         if (childTypeName === "Button" && childPropsType === "submit") {
           return React.cloneElement<any>(childEle, {
             key: `${childTypeName}:submit`,
-            disabled,
+            disabled: disabled || childPropsDisabled,
           });
         }
         return childEle;
@@ -95,4 +212,4 @@ const Form: React.FC<iForm> = ({
   )
 };
 
-export default Form;
+export default withBoundary<iForm>(Form);

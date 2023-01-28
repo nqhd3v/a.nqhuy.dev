@@ -5,9 +5,9 @@ import ReactDatePicker from "react-datepicker";
 import { URL_REGEX } from "../../utils/constants";
 import { createLink } from "../../utils/Firebase/services/shortenLinks";
 import Input from "../Input";
-import InputNumber from "../InputNumber";
+import { withBoundary } from "../wrapper/ErrorBoundary";
 
-const ShortenURLCreate = () => {
+const ShortenURLCreate: React.FC = () => {
   const [linkOutput, setLinkOutput] = useState<string>('');
   const [longLink, setLongLink] = useState<string>('');
   const [passCode, setPassCode] = useState<string>('');
@@ -149,4 +149,4 @@ const ShortenURLCreate = () => {
   )
 }
 
-export default ShortenURLCreate;
+export default withBoundary(ShortenURLCreate);

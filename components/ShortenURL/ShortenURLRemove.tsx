@@ -3,6 +3,7 @@ import { SHORTEN_URL_LINK_ID_REGEX } from "../../utils/constants";
 import { getLinkById, removeLink } from "../../utils/Firebase/services/shortenLinks";
 import { tDataTransformed, tShortenLink } from "../../utils/types/model";
 import Input from "../Input";
+import { withBoundary } from "../wrapper/ErrorBoundary";
 
 const RESULT_MAPPING: Record<string, string> = {
   'shortenLink.link-invalid': 'Your link is wrong format!',
@@ -15,7 +16,7 @@ const RESULT_MAPPING: Record<string, string> = {
   'cipher.invalid-world-array': 'Your pass-code is wrong!',
 }
 
-const ShortenURLRemove = () => {
+const ShortenURLRemove: React.FC = () => {
   const [linkChecking, setLinkChecking] = useState<boolean>(false);
   const [data, setData] = useState<tDataTransformed<tShortenLink> | undefined>(undefined);
   const [linkId, setLinkId] = useState<string>('');
@@ -133,4 +134,4 @@ const ShortenURLRemove = () => {
   )
 }
 
-export default ShortenURLRemove;
+export default withBoundary(ShortenURLRemove);

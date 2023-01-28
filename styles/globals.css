@@ -46,18 +46,18 @@ code.comment, .code.comment, code.comment *, .code.comment * {
   @apply text-gray-400 dark:text-gray-500;
 }
 code.comment, .code.comment {
-  @apply before:content-["//"] before:pr-2;
+  @apply before:content-["//"] before:pr-2 before:z-0;
 }
 code.comment a:not(.custom), .code.comment a:not(.custom) {
   @apply text-gray-500 dark:text-gray-400 font-bold
-    after:h-px after:bg-gray-600 dark:after:bg-gray-500;
+    after:h-px after:bg-gray-600 dark:after:bg-gray-500 after:z-0;
 }
 
 input[data-error="true"] {
-  @apply border-red-400 dark:border-red-600;
+  @apply !border-red-400 dark:!border-red-600;
 }
 input:disabled {
-  @apply text-opacity-70 placeholder:text-gray-300 dark:placeholder:text-gray-600 cursor-not-allowed;
+  @apply opacity-30 text-opacity-70 placeholder:text-gray-300 dark:placeholder:text-gray-600 cursor-not-allowed;
 }
 
 ul.input-error {
@@ -68,9 +68,9 @@ ul.input-error li {
 }
 
 button.run {
-  @apply w-full h-10 rounded-md
+  @apply px-5 h-10 rounded-md
     border border-gray-400 dark:border-gray-600
-    bg-light dark:bg-dark duration-300
+    bg-light dark:bg-dark duration-300 text-dark dark:text-light font-bold
     hover:bg-blue-100 dark:hover:bg-blue-900;
 }
 button:disabled.run {

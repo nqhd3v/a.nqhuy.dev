@@ -1,4 +1,9 @@
+import { Timestamp } from "firebase/firestore";
 import { DocumentId, tDataTransformed, tFirestoreQueryItemData } from "../types/model";
+
+// Firestore - Timestamp utils
+export const date2FsTimestamp = (date?: Date) => Timestamp.fromDate(date || new Date());
+export const fsTimestamp2Date = (timestamp: Timestamp): Date | undefined => timestamp ? timestamp.toDate() : undefined;
 
 export const fsArr2Dic = <T extends any>(arr: tDataTransformed<T>[]): Record<DocumentId, tDataTransformed<T>> => {
   const res: Record<DocumentId, tDataTransformed<any>> = {};

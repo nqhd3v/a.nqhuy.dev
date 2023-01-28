@@ -1,10 +1,8 @@
 import { User } from "firebase/auth";
-import { addDoc, deleteDoc, DocumentData, getDoc, getDocs, query, QueryConstraint, QuerySnapshot, setDoc, WithFieldValue, Timestamp, DocumentReference } from "firebase/firestore";
+import { addDoc, deleteDoc, DocumentData, getDoc, getDocs, query, QueryConstraint, QuerySnapshot, setDoc, WithFieldValue, DocumentReference } from "firebase/firestore";
 import { firebaseColl, firebaseDoc } from ".";
+import { date2FsTimestamp } from "../func/mapping";
 import { DocumentId, tDataTransformed } from "../types/model";
-
-// Firestore - Timestamp utils
-export const date2FsTimestamp = (date?: Date) => Timestamp.fromDate(date || new Date());
 
 // Firestore - Add document
 export const fsAdd = async <T extends any>(
@@ -27,7 +25,7 @@ export const fsAddWithId = async <T extends any>(
 ): Promise<tDataTransformed<T> | undefined> => {
   try {
     await setDoc(firebaseDoc(path, ...[...pathSegments, id]), data);
-    return await fsReadOne(path, ...[...pathSegments, id]);
+    return await fsReadOne<T>(path, ...[...pathSegments, id]);
   } catch (err) {
     throw err;
   }
@@ -47,12 +45,30 @@ export const transformData = <T extends any>(querySnapshot: QuerySnapshot<Docume
   });
   return data;
 }
+export const transformData2Arr = <T extends any>(querySnapshot: QuerySnapshot<DocumentData>): tDataTransformed<T>[] => {
+  return querySnapshot.docs.map(snap => {
+    const dataItem = snap.data() as T;
+    if (typeof dataItem === "object") {
+      return {
+        data: dataItem,
+        _ref: snap.ref,
+        _id: snap.id,
+      }
+    }
+    return undefined;
+  }).filter(d => d) as tDataTransformed<T>[];
+}
 
+export const transformUserD2O = (user: User): any => ({
+  email: user.email || null,
+  photoURL: user.photoURL || null,
+  displayName: user.displayName || 'Unnamed',
+  joinedAt: date2FsTimestamp(),
+})
 export const transformUser = (user: User): any => ({
-  photoURL: user.photoURL || '',
-  displayName: user.displayName || 'No name',
-  email: user.email || 'No email',
-  createdAt: date2FsTimestamp(),
+  email: user.email || null,
+  photoURL: user.photoURL || null,
+  displayName: user.displayName || 'Unnamed',
 })
 
 // Firestore - Read documents
@@ -81,6 +97,21 @@ export const fsReadWithCond = async <Type extends object>(
   } catch (err) {
     console.error(`Error when reading [${[path, ...pathSegments].join('/')}]:`, err);
     return {};
+  }
+}
+
+export const fsReadArrWithCond = async <Type extends object>(
+  queries: QueryConstraint[],
+  path: string,
+  ...pathSegments: string[]
+): Promise<tDataTransformed<Type>[]> => {
+  try {
+    const q = query(firebaseColl(path, ...pathSegments), ...queries);
+    const querySnapshot = await getDocs(q);
+    return transformData2Arr<Type>(querySnapshot);
+  } catch (err) {
+    console.error(`Error when reading [${[path, ...pathSegments].join('/')}]:`, err);
+    return [];
   }
 }
 

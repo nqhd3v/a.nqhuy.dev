@@ -1,13 +1,14 @@
 import React, { ReactNode } from 'react';
 import { NextSeo } from 'next-seo';
+import { withBoundary } from './ErrorBoundary';
 
-interface ILayout {
+interface iLayout {
   children: ReactNode;
   title: string;
   description: string;
 }
 
-const Layout: React.FC<ILayout> = ({ children, title, description }) => (
+const Layout: React.FC<iLayout> = ({ children, title, description }) => (
   <div className='w-full overflow-x-hidden'>
     <NextSeo title={title} description={description} openGraph={{ title, description }} />
     <main
@@ -18,4 +19,4 @@ const Layout: React.FC<ILayout> = ({ children, title, description }) => (
   </div>
 )
 
-export default Layout;
+export default withBoundary<iLayout>(Layout);

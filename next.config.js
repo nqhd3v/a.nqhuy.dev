@@ -8,6 +8,9 @@ const nextConfig = {
       path.join(__dirname, 'pages', '**', '*.scss'),
     ],
   },
+  images: {
+    domains: ["lh3.googleusercontent.com"]
+  },
   reactStrictMode: true,
   swcMinify: true,
 }
