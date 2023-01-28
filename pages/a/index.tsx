@@ -55,4 +55,4 @@ const ActivityTracking = () => {
   )
 };
 
-export default withFirebaseAuth(ActivityTracking);
+export default withFirebaseAuth(ActivityTracking, true);
