@@ -1,5 +1,6 @@
 import { useRouter } from "next/router";
 import React, { useState } from "react";
+import { FormattedMessage } from "react-intl";
 import { joinActivityByCode } from "../../utils/Firebase/services/activityTrackings";
 import { tDataTransformed, tUser } from "../../utils/types/model";
 import { useFirebaseAuth } from "../Firebase/FirebaseAuthWrapper";
@@ -33,11 +34,7 @@ const JoinActivityCard: React.FC<iJoinActivityCard> = ({ className, disabled, go
     setJoining(true);
     const res = await joinActivityByCode(code, user as tDataTransformed<tUser>);
     if (res.isError || !res.data) {
-      if (res.errorMessageId) {
-        form.setFieldError('code', [res.errorMessageId])
-      } else {
-        console.error('Unknown error when joining a new activity!');
-      }
+      form.setFieldError('code', [res.errorMessageId || 'exception.activityTracking.join.unknown'])
       setJoining(false);
       return;
     }
@@ -59,7 +56,9 @@ const JoinActivityCard: React.FC<iJoinActivityCard> = ({ className, disabled, go
           <span className="func">join</span>
           {'()'}
         </div>
-        <div className="code comment text-sm mb-2">Join a new activity by its code</div>
+        <div className="code comment text-sm mb-2">
+          <FormattedMessage id="activityTracking.join.sub-tit" />
+        </div>
         <Form onFinish={handleJoin} form={form}>
           <InputWithButton
             placeholder="activity_code ="

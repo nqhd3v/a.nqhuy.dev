@@ -1,5 +1,6 @@
 import { useRouter } from "next/router";
 import React, { useState } from "react";
+import { FormattedMessage } from "react-intl";
 import { createActivity } from "../../utils/Firebase/services/activityTrackings";
 import { tDataTransformed, tUser } from "../../utils/types/model";
 import { useFirebaseAuth } from "../Firebase/FirebaseAuthWrapper";
@@ -33,11 +34,7 @@ const CreateActivityCard: React.FC<iCreateActivityCard> = ({ className, disabled
     setCreating(true);
     const res = await createActivity(name, user as tDataTransformed<tUser>);
     if (res.isError || !res.data) {
-      if (res.errorMessageId) {
-        form.setFieldError('name', [res.errorMessageId])
-      } else {
-        console.error('Unknown error when creating a new activity!');
-      }
+      form.setFieldError('name', [res.errorMessageId || 'exception.activityTracking.create.unknown'])
       setCreating(false);
       return;
     }
@@ -58,7 +55,9 @@ const CreateActivityCard: React.FC<iCreateActivityCard> = ({ className, disabled
         <span className="func">create</span>
         {'()'}
       </div>
-      <div className="code comment text-sm mb-2">Create a new activity by its name</div>
+      <div className="code comment text-sm mb-2">
+        <FormattedMessage id="activityTracking.create.sub-tit" />
+      </div>
       <Form onFinish={handleCreate} form={form}>
         <InputWithButton
           placeholder="activity_name ="

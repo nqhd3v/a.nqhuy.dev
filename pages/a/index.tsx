@@ -6,10 +6,12 @@ import { useFirebaseAuth, withFirebaseAuth } from "../../components/Firebase/Fir
 import SubPageHeader from "../../components/SubPageHeader";
 import LayoutAnimated from "../../components/wrapper/LayoutAnimated";
 import { getActivities } from "../../utils/Firebase/services/activityTrackings";
+import useMessage from "../../utils/international";
 import { tActivityTracking, tDataTransformed, tUser } from "../../utils/types/model";
 
 const ActivityTracking = () => {
   const { user, isAuthenticating } = useFirebaseAuth();
+  const { message } = useMessage();
   const [activities, setActivities] = useState<tDataTransformed<tActivityTracking>[]>([]);
   const [fetching, setFetching] = useState<boolean>(true);
 
@@ -34,7 +36,7 @@ const ActivityTracking = () => {
   return (
     <LayoutAnimated title="Activity Tracking" description="This application allow user to track their activity!">
       <div className="w-full max-w-[650px] m-auto pt-10">
-        <SubPageHeader title="ActivityTracking" description="This application allow user to track their activities." />
+        <SubPageHeader title="ActivityTracking" description={message('activityTracking.desc')} />
         <CreateActivityCard
           goToDetailAfterCreated
           disabled={isAuthenticating || !user}

@@ -1,11 +1,10 @@
 import { DocumentReference, getDoc, orderBy, setDoc, where } from "firebase/firestore";
-import { date2FsTimestamp } from "../../func/mapping";
+import { boolRes, date2FsTimestamp } from "../../func/mapping";
 import { randomStr } from "../../func/random";
-import { tActivityTrackingD20 } from "../../types/dto";
-import { tActivityTracking, tDataTransformed, tFirestoreQueryItemsTransformedData, tFirestoreQueryItemTransformedData, tUser } from "../../types/model";
-import { fsAdd, fsReadArrWithCond } from "../firestore";
+import { tActivityTracking, tActivityTrackingUpdate, tDataTransformed, tFirestoreQueryItemsTransformedData, tFirestoreQueryItemTransformedData, tUser } from "../../types/model";
+import { fsAdd, fsReadArrWithCond, joinRefList } from "../firestore";
 
-const ACTIVITY_TRACKING_ROOT_COLLECTION = "activity_trackings";
+export const fsActivityTrackingPath = "activity_trackings";
 
 export const createActivity = async (name: string, user: tDataTransformed<tUser>): Promise<tFirestoreQueryItemTransformedData<tActivityTracking>> => {
   try {
@@ -21,7 +20,9 @@ export const createActivity = async (name: string, user: tDataTransformed<tUser>
       createdBy: user._ref,
       participants: [user._ref],
       createdAt: date2FsTimestamp(),
-    }, ACTIVITY_TRACKING_ROOT_COLLECTION);
+      checkInAvailable: false,
+      participantsCheckedIn: [],
+    }, fsActivityTrackingPath);
     if (!data) {
       return {
         isError: true,
@@ -46,7 +47,7 @@ export const getActivities = async (user: tDataTransformed<tUser>): Promise<tFir
         orderBy('createdAt', 'desc'),
         orderBy('name', 'asc'),
       ],
-      ACTIVITY_TRACKING_ROOT_COLLECTION,
+      fsActivityTrackingPath,
     );
     return {
       data,
@@ -55,21 +56,21 @@ export const getActivities = async (user: tDataTransformed<tUser>): Promise<tFir
     console.error('Error when getting activities:', err);
     return {
       isError: true,
-      errorMessageId: 'exception.activityTracking.fetch.unknown',
+      errorMessageId: 'exception.activityTracking.get.unknown',
     }
   }
 }
 
-export const getActivityByCode = async (code: string, user: tDataTransformed<tUser>): Promise<tFirestoreQueryItemTransformedData<tActivityTracking> | undefined> => {
+export const getActivityByCode = async (code: string, user: tDataTransformed<tUser>, forJoined = true): Promise<tFirestoreQueryItemTransformedData<tActivityTracking> | undefined> => {
   try {
     const data = await fsReadArrWithCond<tActivityTracking>(
-      [
+      forJoined ? [
         where('code', '==', code),
         where('participants', 'array-contains' , user._ref),
         orderBy('createdAt', 'desc'),
         orderBy('name', 'asc'),
-      ],
-      ACTIVITY_TRACKING_ROOT_COLLECTION,
+      ] : [ where('code', '==', code) ],
+      fsActivityTrackingPath,
     );
     if (data.length === 0) {
       return {
@@ -82,22 +83,22 @@ export const getActivityByCode = async (code: string, user: tDataTransformed<tUs
     console.error('Error when getting activities:', err);
     return {
       isError: true,
-      errorMessageId: 'exception.activityTracking.fetch.unknown',
+      errorMessageId: 'exception.activityTracking.get.unknown',
     }
   }
 }
 
-export const joinActivityByCode = async (code: string, user: tDataTransformed<tUser>): Promise<tFirestoreQueryItemTransformedData<tActivityTracking>> => {
+export const joinActivityByCode = async (code: string, user: tDataTransformed<tUser>, skipJoined?: boolean): Promise<tFirestoreQueryItemTransformedData<tActivityTracking>> => {
   try {
     if (!code || !user) {
       return {
         isError: true,
-        errorMessageId: 'exception.activityTracking.join.invalid-input',
+        errorMessageId: 'exception.activityTracking.invalid-input',
       };
     }
     const data = await fsReadArrWithCond<tActivityTracking>(
       [ where('code', '==', code) ],
-      ACTIVITY_TRACKING_ROOT_COLLECTION,
+      fsActivityTrackingPath,
     );
     if (data.length === 0) {
       return {
@@ -105,7 +106,10 @@ export const joinActivityByCode = async (code: string, user: tDataTransformed<tU
         errorMessageId: 'exception.activityTracking.join.notfound',
       };
     }
-    if (data[0].data.participants.includes(user._ref)) {
+    if (data[0].data.participants.map(p => p.path).includes(user._ref.path)) {
+      if (skipJoined) {
+        return data[0];
+      }
       return {
         isError: true,
         errorMessageId: 'exception.activityTracking.join.joined',
@@ -134,12 +138,12 @@ export const joinActivityByCode = async (code: string, user: tDataTransformed<tU
   }
 }
 
-export const updateActivity = async (ref: DocumentReference, data: tActivityTrackingD20): Promise<tFirestoreQueryItemTransformedData<tActivityTracking>> => {
+export const updateActivity = async (ref: DocumentReference, data: Partial<tActivityTrackingUpdate>): Promise<tFirestoreQueryItemTransformedData<tActivityTracking>> => {
   try {
-    if (!ref || !data.name || !data.name || (data.time?.start && !data.time?.end) || (!data.time?.start && data.time?.end)) {
+    if (!ref || (data.time?.start && !data.time?.end) || (!data.time?.start && data.time?.end)) {
       return {
         isError: true,
-        errorMessageId: 'exception.activityTracking.update.invalid-input',
+        errorMessageId: 'exception.activityTracking.invalid-input',
       };
     }
     const currentActivity = await getDoc(ref);
@@ -149,10 +153,15 @@ export const updateActivity = async (ref: DocumentReference, data: tActivityTrac
         errorMessageId: 'exception.activityTracking.update.notfound'
       }
     }
-    // const currentActivityData = currentActivity.data() as tActivityTracking;
-    const dataNeedUpdate = data.time
-      ? { name: data.name, startedAt: date2FsTimestamp(data.time.start), finishedAt: date2FsTimestamp(data.time.end) }
-      : { name: data.name };
+    const currentActivityData = currentActivity.data() as tActivityTracking;
+    const dataNeedUpdate = {
+      name: data.name || currentActivityData.name,
+      startedAt: data.time ? date2FsTimestamp(data.time.start) : (currentActivityData.startedAt || null),
+      finishedAt: data.time ? date2FsTimestamp(data.time.end) : (currentActivityData.finishedAt || null),
+      participants: joinRefList(currentActivityData.participants, ...(data.participants || [])),
+      participantsCheckedIn: joinRefList(currentActivityData.participantsCheckedIn, ...(data.participantsCheckedIn || [])),
+      checkInAvailable: boolRes(data.checkInAvailable, currentActivityData.checkInAvailable),
+    };
     await setDoc(
       ref,
       dataNeedUpdate,
@@ -178,3 +187,28 @@ export const updateActivity = async (ref: DocumentReference, data: tActivityTrac
     }
   }
 }
+
+export const updateCheckInState = async (ref: DocumentReference, isOpen = true): Promise<tFirestoreQueryItemTransformedData<tActivityTracking>> => {
+  try {
+    return await updateActivity(ref, { checkInAvailable: isOpen })
+  } catch (err) {
+    console.error('Error when updating check-in state for an activity:', err);
+    return {
+      isError: true,
+      errorMessageId: 'exception.activityTracking.update.unknown',
+    }
+  }
+}
+
+export const checkIn = async (ref: DocumentReference, userRef: DocumentReference): Promise<tFirestoreQueryItemTransformedData<tActivityTracking>> => {
+  try {
+    return await updateActivity(ref, { participantsCheckedIn: [userRef] });
+  } catch (err) {
+    console.error('Error when handling check-in for an activity:', err);
+    return {
+      isError: true,
+      errorMessageId: 'exception.activityTracking.update.unknown',
+    }
+  }
+}
+

@@ -1,5 +1,6 @@
 import { forwardRef, useEffect, useReducer } from "react";
 import DatePicker, { ReactDatePickerProps } from "react-datepicker"
+import { FormattedMessage } from "react-intl";
 import { tFormRule } from "./Form/types";
 
 const CustomInput = forwardRef((props: any, ref: any) => {
@@ -70,7 +71,7 @@ const InputDateRange: React.FC<iInputDateRange> = ({ value, label, onChange, sta
     }
     return (
       <ul className="input-error">
-        {errors.map(err => <li key={err}>{err}</li>)}
+        {errors.map(err => <li key={err}><FormattedMessage id={err} /></li>)}
       </ul>
     )
   }

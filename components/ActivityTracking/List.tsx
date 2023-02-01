@@ -1,12 +1,15 @@
 import moment from "moment";
 import { useRouter } from "next/router";
+import { FormattedMessage } from "react-intl";
 import { fsTimestamp2Date } from "../../utils/func/mapping";
+import useMessage from "../../utils/international";
 import { tActivityTracking, tDataTransformed } from "../../utils/types/model";
 import SquareBracketAction from "../SquareBracket";
 import { withBoundary } from "../wrapper/ErrorBoundary";
 
 const ActivityListItem = ({ data }: { data: tDataTransformed<tActivityTracking> }) => {
   const router = useRouter();
+  const { message } = useMessage();
   const startedAt = data.data.startedAt ? moment(fsTimestamp2Date(data.data.startedAt)) : undefined;
   const finishedAt = data.data.finishedAt ? moment(fsTimestamp2Date(data.data.finishedAt)) : undefined;
   return (
@@ -24,7 +27,7 @@ const ActivityListItem = ({ data }: { data: tDataTransformed<tActivityTracking> 
       <div className="code comment text-sm">
         {startedAt && finishedAt
           ? startedAt.format('DD/MM/YYYY HH:mm') + ' - ' + finishedAt.format('DD/MM/YYYY HH:mm')
-          : 'no time'}
+          : message('activityTracking.info.no-time')}
       </div>
     </div>
   )
@@ -36,6 +39,8 @@ interface iActivitiesList {
   loading?: boolean;
 }
 const ActivitiesList: React.FC<iActivitiesList> = ({ items, onGetActivities, loading }) => {
+  const { message } = useMessage()
+
   return (
     <div className="relative grid grid-cols-1 gap-2">
       <div className="border border-b-gray-300 dark:border-b-gray-800 border-gray-400 dark:border-gray-600 rounded-md rounded-bl-none rounded-br-none p-5 pb-2">
@@ -47,11 +52,11 @@ const ActivitiesList: React.FC<iActivitiesList> = ({ items, onGetActivities, loa
         </div>
         <div className="code comment text-sm flex items-center">
           <span>
-            {'All activities you have been joined'}
+            <FormattedMessage id="activityTracking.list.my" />
             {' - '}
-            <i>{loading ? 'loading latest data...' : 'latest data'}</i>
+            <i>{loading ? message('sample.loading-data') : message('sample.latest-data')}</i>
           </span>
-          <SquareBracketAction onClick={onGetActivities} disabled={loading} content="sync" className="ml-auto" />
+          <SquareBracketAction onClick={onGetActivities} disabled={loading} content={message('word.sync')} className="ml-auto" />
         </div>
       </div>
       {items.map(item => <ActivityListItem data={item} key={item._id} />)}

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { FormattedMessage } from "react-intl";
 import { tFormRule } from "./Form/types";
 import ErrorBoundary, { withBoundary } from "./wrapper/ErrorBoundary";
 
@@ -57,7 +58,7 @@ const InputWithButton: React.FC<iInputWithButton> = ({
     }
     return (
       <ul className="input-error">
-        {errors.map(err => <li key={err}>{err}</li>)}
+        {errors.map(err => <li key={err}><FormattedMessage id={err} /></li>)}
       </ul>
     )
   }

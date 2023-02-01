@@ -79,10 +79,10 @@ const Form: React.FC<iForm> = ({
       ...formErr,
       [field]: (errors.length === 0)
         ? []
-        : [
+        : [...Array.from(new Set([
           ...(formErr[field] || []),
           ...errors,
-        ]
+        ]))],
     };
     setFormErr(newFormErrors);
     return newFormErrors;

@@ -5,12 +5,3 @@ export type tShortLinkD2O = {
   passCode?: string;
   expiredTime?: Date;
 }
-
-export type tActivityTrackingD20 = {
-  name: string;
-  time?: {
-    start: Date;
-    end: Date;
-  };
-  participants?: DocumentReference[];
-}

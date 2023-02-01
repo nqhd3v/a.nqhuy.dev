@@ -24,6 +24,19 @@ export type tActivityTracking = {
   createdAt: Timestamp;
   startedAt: Timestamp;
   finishedAt: Timestamp;
+  checkInAvailable: boolean;
+  participantsCheckedIn: DocumentReference[];
+}
+
+export type tActivityTrackingUpdate = {
+  name: string;
+  time: {
+    start: Date;
+    end: Date;
+  };
+  participants: DocumentReference[];
+  checkInAvailable: boolean;
+  participantsCheckedIn: DocumentReference[];
 }
 
 export type tFirestoreQueryItemData<Type> = {

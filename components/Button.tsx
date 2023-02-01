@@ -29,8 +29,8 @@ const Button: React.FC<iButton> = ({
       disabled={isDisabledButton}
       onClick={() => isDisabledButton ? null : onClick?.()}
     >
-      {loading ? 'running ' : null }
       {children}
+      {loading ? '...' : null }
     </button>
   )
 };

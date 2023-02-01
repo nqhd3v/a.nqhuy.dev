@@ -51,7 +51,7 @@ const FirebaseWithAccount: React.FC<iFirebaseWithAccount> = ({ withDesc, disable
             className="mb-2"
             hideErrorMessage
           />
-          <Button loading={loading} type="submit" className="code">
+          <Button loading={loading} type="submit" className="code w-full">
             <span className="var">a</span>
             {'.'}
             <span className="func">withAccount</span>

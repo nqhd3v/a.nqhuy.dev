@@ -21,13 +21,6 @@ export const firstDataTransformedItem = <T extends any>(record: Record<DocumentI
   return record[Object.keys(record)[0]];
 }
 
-export const errorQuery = <T extends any>(rootLocale: string) => (messageId: string = 'notfound'): tFirestoreQueryItemData<T> => {
-  return {
-    isError: true,
-    errorMessageId: `${rootLocale}.${messageId}`,
-  };
-}
-
 export const mapLength = (mapping: Record<string, any>, deep?: boolean): number => Object.keys(mapping).filter(k => {
   if (deep) {
     if (Array.isArray(mapping[k])) {
@@ -39,3 +32,5 @@ export const mapLength = (mapping: Record<string, any>, deep?: boolean): number 
   }
   return mapping[k]
 }).length;
+
+export const boolRes = (f?: boolean, s?: boolean): boolean => f === undefined ? !!s : f;

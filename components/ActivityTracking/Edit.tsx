@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { FormattedMessage } from "react-intl";
 import { updateActivity } from "../../utils/Firebase/services/activityTrackings";
 import { fsTimestamp2Date } from "../../utils/func/mapping";
 import { DocumentId, tActivityTracking, tDataTransformed } from "../../utils/types/model";
@@ -10,20 +11,20 @@ import InputDateRange from "../InputDateRange";
 
 interface iEditActivity {
   data?: tDataTransformed<tActivityTracking>;
-  onReUpdateData?: (newData: tDataTransformed<tActivityTracking>) => Promise<void> | void;
+  onDone?: (newData: tDataTransformed<tActivityTracking>) => Promise<void> | void;
 }
-const EditActivity: React.FC<iEditActivity> = ({ data, onReUpdateData }) => {
+const EditActivity: React.FC<iEditActivity> = ({ data, onDone }) => {
   const form = useForm();
   const [error, setError] = useState<string | undefined>(undefined);
   const [updating, setUpdating] = useState<boolean>(false);
 
   const handleSubmit = async ({ name, time }: any) => {
     if (!data) {
-      console.error('Something went wrong when handle update activity!');
+      setError('exception.activityTracking.update.unknown');
       return;
     }
     if ((!time.start && time.end) || (time.start && !time.end)) {
-      form.setFieldError('time', ['This both field have to emptied, or filled together!']);
+      form.setFieldError('time', ['exception.activityTracking.form.time.require-or-empty-together']);
       return;
     }
     setUpdating(true);
@@ -36,7 +37,7 @@ const EditActivity: React.FC<iEditActivity> = ({ data, onReUpdateData }) => {
       setUpdating(false);
       return;
     }
-    await onReUpdateData?.({
+    await onDone?.({
       data: res.data as tActivityTracking,
       _id: res._id as DocumentId,
       _ref: data._ref,
@@ -86,7 +87,7 @@ const EditActivity: React.FC<iEditActivity> = ({ data, onReUpdateData }) => {
       {error ? (
         <div className="code comment">
           <b>{'Error: '}</b>
-          {error}
+          <FormattedMessage id={error} />
         </div>
       ) : null}
     </div>

@@ -40,7 +40,7 @@ const Modal: React.FC<iModal> = ({ children, visible, title, closable, backdropC
           onClick={(e) => e.stopPropagation()}
           className={
             "relative bg-blue-100 dark:bg-dark border border-gray-400 dark:border-gray-600 rounded-md min-h-[100px] pb-5 " +
-            "w-[calc(90%-40px)] max-w-[650px] "
+            "w-[calc(100%-40px)] max-w-[650px] shadow-md"
           }
           variants={modalVariant}
           initial="hidden"

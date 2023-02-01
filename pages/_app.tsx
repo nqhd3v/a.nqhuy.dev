@@ -9,6 +9,8 @@ import "react-datepicker/dist/react-datepicker.min.css";
 import "../styles/datepicker.css";
 import '../styles/globals.css'
 import { GlobalDebug } from '../utils/func/disableLog';
+import { IntlProvider } from 'react-intl';
+import locales from '../locales';
 
 function MyApp({ Component, pageProps, router }: AppProps) {
   const url = `https://a.nqhuy.dev${router.route}`;
@@ -34,17 +36,17 @@ function MyApp({ Component, pageProps, router }: AppProps) {
   // Handle error here
   if (router.pathname === "/404") {
     return (
-      <>
+      <IntlProvider locale={router.locale || 'en-US'} messages={locales[router.locale || 'en-US']}>
         <Head>
           <link rel="icon" href="/favicon.png" type="image/png" />
         </Head>
         <Component {...pageProps} canonical={url} key={url} />
-      </>  
+      </IntlProvider>  
     )
   }
 
   return (
-    <>
+    <IntlProvider locale={router.locale || 'en'} messages={locales[router.locale || 'en']}>
       <Head>
         <link rel="icon" href="/favicon.png" type="image/png" />
       </Head>
@@ -67,7 +69,7 @@ function MyApp({ Component, pageProps, router }: AppProps) {
       >
         <Component {...pageProps} canonical={url} key={url} />
       </AnimatePresence>
-    </>
+    </IntlProvider>
   )
 }
 

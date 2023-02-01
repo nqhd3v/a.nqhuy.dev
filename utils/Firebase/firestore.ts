@@ -1,5 +1,5 @@
 import { User } from "firebase/auth";
-import { addDoc, deleteDoc, DocumentData, getDoc, getDocs, query, QueryConstraint, QuerySnapshot, setDoc, WithFieldValue, DocumentReference } from "firebase/firestore";
+import { addDoc, deleteDoc, DocumentData, getDoc, getDocs, query, QueryConstraint, QuerySnapshot, setDoc, WithFieldValue, DocumentReference, onSnapshot } from "firebase/firestore";
 import { firebaseColl, firebaseDoc } from ".";
 import { date2FsTimestamp } from "../func/mapping";
 import { DocumentId, tDataTransformed } from "../types/model";
@@ -170,4 +170,10 @@ export const fsRemoveByRef = async (ref: DocumentReference): Promise<boolean | E
   } catch (err) {
     throw err;
   }
+}
+
+export const joinRefList = (root: DocumentReference[] = [], ...refs: DocumentReference[]): DocumentReference[] => {
+  const current = root.map(d => d.path);
+  const refsNeedJoin = refs.filter(r => !current.includes(r.path));
+  return [...root, ...refsNeedJoin];
 }

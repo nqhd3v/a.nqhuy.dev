@@ -1,15 +1,17 @@
+import { DocumentReference } from "firebase/firestore";
 import Image from "next/image";
 import React from "react";
+import { FormattedMessage } from "react-intl";
 import { tActivityTracking, tDataTransformed, tUser } from "../../utils/types/model";
 
 interface iActivityParticipants {
   className?: string;
-  data?: tDataTransformed<tActivityTracking>;
-  userMapping: Record<string, tDataTransformed<tUser>>;
+  data?: DocumentReference[];
+  dic: Record<string, tDataTransformed<tUser>>;
   loading?: boolean;
 }
 
-const ActivityParticipants: React.FC<iActivityParticipants> = ({ className, data, userMapping, loading }) => {
+const ActivityParticipants: React.FC<iActivityParticipants> = ({ className, data, dic, loading }) => {
   if (loading) {
     return (
       <div
@@ -31,7 +33,7 @@ const ActivityParticipants: React.FC<iActivityParticipants> = ({ className, data
       </div>
     )
   }
-  if (!data) {
+  if (!Array.isArray(data)) {
     return null;
   }
   return (
@@ -42,12 +44,12 @@ const ActivityParticipants: React.FC<iActivityParticipants> = ({ className, data
         (className || '')
       }>
       <div className="flex items-center pr-3 bg-blue-100 dark:bg-dark">
-        {data.data.participants.map(user => (
+        {data.map(user => (
           <div className="relative h-9 w-9 -ml-3 first:ml-0 rounded-full border-4 border-blue-100 dark:border-dark overflow-hidden bg-blue-100 dark:bg-dark" key={`activity.sum-up.user-list.${user.id}`}>
-            {userMapping[user.id] ? (<Image
+            {dic[user.id] ? (<Image
               width={36}
               height={36}
-              src={userMapping[user.id].data.photoURL || '/'}
+              src={dic[user.id].data.photoURL || '/'}
               alt=""
             />) : (
               <div className="absolute top-0 left-0 h-full w-full rounded-full animate-pulse bg-gray-400/30 dark:bg-gray-600/30" />
@@ -56,8 +58,10 @@ const ActivityParticipants: React.FC<iActivityParticipants> = ({ className, data
         ))}
       </div>
       <span className="text-gray-400 dark:text-gray-600 font-bold bg-blue-100 dark:bg-dark pl-3">
-        {data.data.participants.length}
-        {' participant(s)'}
+        <FormattedMessage
+          id="activityTracking.participants.count"
+          values={{ count: data.length }}
+        />
       </span>
     </div>
   )

@@ -1,6 +1,6 @@
-import { DocumentReference, getDoc, setDoc, where } from "firebase/firestore";
+import { DocumentReference, where } from "firebase/firestore";
 import { decryptAES, encryptAES } from "../../func/cipher";
-import { date2FsTimestamp, errorQuery, firstDataTransformedItem } from "../../func/mapping";
+import { date2FsTimestamp, firstDataTransformedItem } from "../../func/mapping";
 import { randomPassCode, randomShortenLinkId } from "../../func/random";
 import { tShortLinkD2O } from "../../types/dto";
 import { tDataTransformed, tFirestoreQueryItemData, tShortenLink } from "../../types/model";
@@ -8,8 +8,6 @@ import { fsAdd, fsReadWithCond, fsRemoveByRef } from "../firestore";
 
 const ROOT_COLLECTION_KEY = "shorten_links";
 
-
-const error = errorQuery<tDataTransformed<tShortenLink>>('shortenLink');
 export const getLinkById = async (shortId: string, passCode?: string): Promise<tFirestoreQueryItemData<tDataTransformed<tShortenLink>>> => {
   try {
     // Find with shortId with `availableUntil` is NULL
@@ -29,13 +27,19 @@ export const getLinkById = async (shortId: string, passCode?: string): Promise<t
       firstDataTransformedItem<tShortenLink>(shortenLinkWithAvailableUntil);
 
     if (!shortenLinkTransformed) {
-      return error();
+      return {
+        isError: true,
+        errorMessageId: 'exception.shortenLink.getById.unknown',
+      };
     }
 
     const { data } = shortenLinkTransformed;
 
     if (data.passCode && !passCode) {
-      return error('require-passCode');
+      return {
+        isError: true,
+        errorMessageId: 'exception.shortenLink.invalid-input',
+      };
     }
 
     if (passCode && data.passCode) {
@@ -49,7 +53,7 @@ export const getLinkById = async (shortId: string, passCode?: string): Promise<t
       if (!linkNeedOpen.data) {
         return {
           isError: true,
-          errorMessageId: 'exception.sample.data-empty',
+          errorMessageId: 'exception.shortenLink.invalid-input',
         };
       }
       shortenLinkTransformed.data.longLink = linkNeedOpen.data.link as string;
@@ -60,7 +64,7 @@ export const getLinkById = async (shortId: string, passCode?: string): Promise<t
     console.error(`Error when getting link by ID (${shortId}):`, err);
     return {
       isError: true,
-      errorMessageId: 'sample.unknown-error',
+      errorMessageId: 'exception.shortenLink.getById.unknown',
     };
   }
 }
@@ -81,14 +85,20 @@ export const createLink = async ({ longLink, passCode, expiredTime }: tShortLink
     }
     const res = await fsAdd<tShortenLink>(shortLinkData, ROOT_COLLECTION_KEY);
     if (!res) {
-      return error('unknown');
+      return {
+        isError: true,
+        errorMessageId: 'exception.shortenLink.create.unknown',
+      };
     }
     return {
       data: res,
     };
   } catch (err: any) {
     console.error('Error when creating a shorten link:', [longLink, passCode, expiredTime], err);
-    return error('unknown');
+    return {
+      isError: true,
+      errorMessageId: 'exception.shortenLink.create.unknown',
+    };
   }
 }
 
