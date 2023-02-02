@@ -13,10 +13,11 @@ interface iCheckIn {
   fetching: boolean;
   isOwner: boolean;
   isAllowCheckIn: boolean;
+  className?: string;
   onStarted?: () => Promise<void> | void;
   onFinished?: () => Promise<void> | void;
 }
-const CheckIn: React.FC<iCheckIn> = ({ data, activityRef, fetching, isOwner, isAllowCheckIn, onStarted, onFinished }) => {
+const CheckIn: React.FC<iCheckIn> = ({ data, activityRef, fetching, isOwner, isAllowCheckIn, className, onStarted, onFinished }) => {
   const { user } = useFirebaseAuth();
   const isCheckedIn = useMemo(() => {
     if (!user) return false;
@@ -120,12 +121,18 @@ const CheckIn: React.FC<iCheckIn> = ({ data, activityRef, fetching, isOwner, isA
   }
 
   return (
-    <div className="w-full border border-gray-400 dark:border-gray-600 rounded-md">
+    <div
+      className={
+        "w-full border border-gray-400 dark:border-gray-600 rounded-md " +
+        (className || '')
+      }
+    >
       <div className="flex flex-col sm:flex-row items-center p-5">
         <div className="w-full flex items-center mb-2 sm:w-auto sm:mb-0 sm:mr-auto">
           <Button
             className="w-[calc(100%-40px)] sm:w-auto sm:b-0"
-            onClick={handleCheckInClick} disabled={isCheckedIn || fetching || !data}
+            onClick={handleCheckInClick}
+            disabled={isCheckedIn || starting || finishing || fetching || !data}
           >
             {btnMsg()}
           </Button>

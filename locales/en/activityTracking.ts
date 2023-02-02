@@ -19,6 +19,8 @@ const activityTracking = {
   'activityTracking.checkIn.run.finishing': 'finishing check-in',
   'activityTracking.checkIn.run.running': 'processing check-in',
   'activityTracking.checkIn.run.checking': 'checking-in for you',
+  'activityTracking.addOns.add': 'add somethings to your activity',
+  'activityTracking.addOns.': '',
   // ERROR =============================
   'error.activityTracking.html.no-view': 'Can not view this activity information because <b>it is not exist</b>!',
   'error.activityTracking.checkIn.activity-removed-while-checking-in': 'Someone removed this activity! Re-check and try again later!',

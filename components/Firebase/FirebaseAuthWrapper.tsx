@@ -4,6 +4,8 @@ import { logout, onAuthStateChanged } from "../../utils/Firebase/auth";
 import { createUserIfNotExist } from "../../utils/Firebase/services/user";
 import { tDataTransformed, tUser } from "../../utils/types/model";
 import { tComponentWrapper } from "../../utils/types/sample";
+import Account from "../Account";
+import DarkModeToggle from "../DarkModeToggle";
 import Authenticated from "../wrapper/Authenticated";
 import { withBoundary } from "../wrapper/ErrorBoundary";
 
@@ -68,9 +70,10 @@ const FirebaseAuthWrapper: React.FC<tComponentWrapper> = ({ children }) => {
       }}
     >
       {children}
-      {!!currentUser ? (
-        <div className="fixed top-5 right-5 w-12 h-8 rounded-3xl bg-dark dark:bg-light" onClick={logout}></div>
-      ) : null}
+      <div className="fixed top-0 right-0 w-full h-[60px] bg-blue-100/30 dark:bg-dark/30 backdrop-blur-sm flex justify-end items-center space-x-5 px-5">
+        <DarkModeToggle />
+        <Account />
+      </div>
     </FirebaseAuthContext.Provider>
   )
 };

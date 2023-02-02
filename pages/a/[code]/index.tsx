@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useReducer, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
+import ActivityAddOns from "../../../components/ActivityTracking/AddOns";
 import CheckedInParticipants from "../../../components/ActivityTracking/CheckedInParticipants";
 import CheckIn from "../../../components/ActivityTracking/CheckIn";
 import EditActivity from "../../../components/ActivityTracking/Edit";
@@ -185,10 +186,11 @@ const ActivityTrackingDetail = () => {
             fetching={isAuthenticating || fetching}
             isOwner={!!activity && !!user && activity.data.createdBy.path === user._ref.path}
             onStarted={() => setState({ checkInProgressModalVisible: true })}
+            className="mb-5"
           />
 
+          <ActivityAddOns />
         </div>
-
       </LayoutAnimated>
       <Modal
         title={(

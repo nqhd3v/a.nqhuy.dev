@@ -34,14 +34,11 @@ const DarkModeToggle: React.FC<iDarkModeToggle> = ({ className }) => {
     typeof window !== 'undefined' && document.documentElement.classList.contains('dark');
   return (
     <button
-      className={`no-default bottom-border w-11 h-11 ${className || ''}`}
+      className={`no-default bottom-border w-11 h-11 overflow-hidden ${className || ''}`}
       onClick={toggleMode}
       aria-label="Dark mode toggle"
     >
-      <AnimatePresence
-        mode="wait"
-        initial={false}
-      >
+      <AnimatePresence mode="wait">
         <motion.div
           key={darkModeActivated ? 'moon-icon' : 'sun-icon'}
           initial={{ x: 8, y: 36 }}

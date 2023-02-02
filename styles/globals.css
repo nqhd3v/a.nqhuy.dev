@@ -10,7 +10,7 @@ body,
     Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
 }
 
-a:not(.custom) {
+a:not(.custom), .link {
   @apply relative text-inherit font-bold text-blue-500
     after:content-[''] after:absolute after:h-0.5 after:bg-blue-300 dark:after:bg-blue-400 after:duration-300 after:-bottom-0.5 after:left-0
     after:w-0 hover:after:w-full;
