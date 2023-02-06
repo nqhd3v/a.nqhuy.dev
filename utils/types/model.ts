@@ -16,6 +16,7 @@ export type tUser = {
   joinedAt: Timestamp;
 }
 
+export type tActivityAction = "poll";
 export type tActivityTracking = {
   name: string;
   code: string;
@@ -26,7 +27,27 @@ export type tActivityTracking = {
   finishedAt: Timestamp;
   checkInAvailable: boolean;
   participantsCheckedIn: DocumentReference[];
+  actions: {
+    type: tActivityAction;
+    ref: DocumentReference;
+  }[];
 }
+// Activity Add-ons
+export type tActivityPollOption = {
+  content: string;
+  selected: DocumentReference[];
+};
+export type tActivityPoll = {
+  question: string;
+  options: tActivityPollOption[];
+  isClosed: boolean;
+  createdBy: DocumentReference;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+};
+
+export type tActivityActions = tActivityPoll;
+export type tDataTransformedActivityActions = tDataTransformed<tActivityPoll>;
 
 export type tActivityTrackingUpdate = {
   name: string;
@@ -37,6 +58,10 @@ export type tActivityTrackingUpdate = {
   participants: DocumentReference[];
   checkInAvailable: boolean;
   participantsCheckedIn: DocumentReference[];
+  actions: {
+    type: tActivityAction;
+    ref: DocumentReference;
+  }[];
 }
 
 export type tFirestoreQueryItemData<Type> = {

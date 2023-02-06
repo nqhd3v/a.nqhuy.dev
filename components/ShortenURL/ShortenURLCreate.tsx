@@ -4,7 +4,7 @@ import { useState } from "react";
 import ReactDatePicker from "react-datepicker";
 import { URL_REGEX } from "../../utils/constants";
 import { createLink } from "../../utils/Firebase/services/shortenLinks";
-import Input from "../Input";
+import { Input } from "../Form";
 import { withBoundary } from "../wrapper/ErrorBoundary";
 
 const ShortenURLCreate: React.FC = () => {

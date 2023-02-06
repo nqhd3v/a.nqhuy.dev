@@ -11,7 +11,7 @@ body,
 }
 
 a:not(.custom), .link {
-  @apply relative text-inherit font-bold text-blue-500
+  @apply relative text-inherit font-bold text-blue-500 cursor-pointer
     after:content-[''] after:absolute after:h-0.5 after:bg-blue-300 dark:after:bg-blue-400 after:duration-300 after:-bottom-0.5 after:left-0
     after:w-0 hover:after:w-full;
   text-decoration: none;
@@ -61,10 +61,16 @@ input:disabled {
 }
 
 ul.input-error {
-  @apply mt-1;
+  @apply mt-1 list-none;
+}
+ul.input-error.errors {
+  @apply list-disc;
 }
 ul.input-error li {
-  @apply text-sm text-red-400 dark:text-red-600 relative pl-4 before:content-['-'] before:absolute before:top-0 before:left-1;
+  @apply text-sm text-red-400 dark:text-red-600 
+}
+ul.input-error.errors li {
+  @apply relative pl-4 before:content-['-'] before:absolute before:top-0 before:left-1;
 }
 
 button.run {

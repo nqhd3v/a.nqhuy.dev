@@ -20,7 +20,7 @@ const CheckedInParticipants: React.FC<iCheckedInParticipants> = ({ data, dic, is
         {data.map(p => {
           const info = dic[p.id];
           return (
-            <div className="px-5 h-8 mr-2 mt-2 flex items-center rounded font-bold bg-blue-200 dark:bg-blue-800" key={`activityTracking.checkIn.list.user.${p.id}.${info ? 'info' : 'preview'}`}>
+            <div className="px-5 h-8 mr-2 mt-2 flex items-center rounded font-bold bg-blue-200 dark:bg-dark-800" key={`activityTracking.checkIn.list.user.${p.id}.${info ? 'info' : 'preview'}`}>
               {info ? info.data.displayName : '--'}
             </div>
           )

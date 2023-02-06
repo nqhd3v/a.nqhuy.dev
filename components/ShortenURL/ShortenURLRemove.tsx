@@ -2,7 +2,7 @@ import { useState } from "react";
 import { SHORTEN_URL_LINK_ID_REGEX } from "../../utils/constants";
 import { getLinkById, removeLink } from "../../utils/Firebase/services/shortenLinks";
 import { tDataTransformed, tShortenLink } from "../../utils/types/model";
-import Input from "../Input";
+import { Input } from "../Form";
 import { withBoundary } from "../wrapper/ErrorBoundary";
 
 const RESULT_MAPPING: Record<string, string> = {

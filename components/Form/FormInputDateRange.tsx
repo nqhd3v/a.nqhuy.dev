@@ -1,7 +1,7 @@
 import { forwardRef, useEffect, useReducer } from "react";
 import DatePicker, { ReactDatePickerProps } from "react-datepicker"
-import { FormattedMessage } from "react-intl";
-import { tFormRule } from "./Form/types";
+import InputError from "./FormInputError";
+import { tFormRule } from "./types";
 
 const CustomInput = forwardRef((props: any, ref: any) => {
   return (
@@ -65,17 +65,6 @@ const InputDateRange: React.FC<iInputDateRange> = ({ value, label, onChange, sta
     }
   }, [localData]);
 
-  const errorContent = () => {
-    if (hideErrorMessage || !Array.isArray(errors) || errors.length === 0) {
-      return null;
-    }
-    return (
-      <ul className="input-error">
-        {errors.map(err => <li key={err}><FormattedMessage id={err} /></li>)}
-      </ul>
-    )
-  }
-
   return (
     <div className={"w-full " + (className || '')}>
       {label ? (
@@ -103,7 +92,7 @@ const InputDateRange: React.FC<iInputDateRange> = ({ value, label, onChange, sta
           disabled={disabled}
         />
       </div>
-      {errorContent()}
+      <InputError hide={hideErrorMessage} errors={errors} />
     </div>
   )
 };

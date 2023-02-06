@@ -1,10 +1,7 @@
 import React, { useState } from "react";
 import { loginWithEmail } from "../../../utils/Firebase/auth";
-import { mapLength } from "../../../utils/func/mapping";
-import { validateEmail } from "../../../utils/func/validate";
 import Button from "../../Button";
-import Form from "../../Form";
-import Input from "../../Input"
+import Form, { Input } from "../../Form";
 
 interface iFirebaseWithAccount {
   withDesc?: boolean;

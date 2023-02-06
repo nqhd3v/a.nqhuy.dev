@@ -1,7 +1,7 @@
 import { DocumentReference, getDoc, orderBy, setDoc, where } from "firebase/firestore";
 import { boolRes, date2FsTimestamp } from "../../func/mapping";
 import { randomStr } from "../../func/random";
-import { tActivityTracking, tActivityTrackingUpdate, tDataTransformed, tFirestoreQueryItemsTransformedData, tFirestoreQueryItemTransformedData, tUser } from "../../types/model";
+import { tActivityAction, tActivityTracking, tActivityTrackingUpdate, tDataTransformed, tFirestoreQueryItemsTransformedData, tFirestoreQueryItemTransformedData, tUser } from "../../types/model";
 import { fsAdd, fsReadArrWithCond, joinRefList } from "../firestore";
 
 export const fsActivityTrackingPath = "activity_trackings";
@@ -160,6 +160,7 @@ export const updateActivity = async (ref: DocumentReference, data: Partial<tActi
       finishedAt: data.time ? date2FsTimestamp(data.time.end) : (currentActivityData.finishedAt || null),
       participants: joinRefList(currentActivityData.participants, ...(data.participants || [])),
       participantsCheckedIn: joinRefList(currentActivityData.participantsCheckedIn, ...(data.participantsCheckedIn || [])),
+      actions: [...(currentActivityData.actions || []), ...(data.actions || [])],
       checkInAvailable: boolRes(data.checkInAvailable, currentActivityData.checkInAvailable),
     };
     await setDoc(
@@ -208,6 +209,18 @@ export const checkIn = async (ref: DocumentReference, userRef: DocumentReference
     return {
       isError: true,
       errorMessageId: 'exception.activityTracking.update.unknown',
+    }
+  }
+}
+
+export const addAction = async (ref: DocumentReference, type: tActivityAction, actionRef: DocumentReference): Promise<tFirestoreQueryItemTransformedData<tActivityTracking>> => {
+  try {
+    return await updateActivity(ref, { actions: [{ type, ref: actionRef }] });
+  } catch (err) {
+    console.error('Error when trying to re-update activity after created a new action:', err);
+    return {
+      isError: true,
+      errorMessageId: `exception.activityTracking.addOns.${type}.created_activity.update.unknown`,
     }
   }
 }

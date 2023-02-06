@@ -40,10 +40,10 @@ export const isFormValidated = (
           )
         )
       ) {
-        errors[field].push(`Field '${field}' is required!`);
+        errors[field].push(rule.message || `Field '${field}' is required!`);
       }
       if (rule.regex && typeof valueItem === "string" && !rule.regex.test(valueItem)) {
-        errors[field].push(`Field '${field}' is wrong format!`);
+        errors[field].push(rule.message || `Field '${field}' is wrong format!`);
       }
       if (!isHasError && errors[field].length > 0) {
         isHasError = true;

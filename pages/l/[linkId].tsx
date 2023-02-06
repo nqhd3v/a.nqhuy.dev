@@ -1,6 +1,6 @@
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
-import InputWithButton from "../../components/InputWithButton";
+import { InputWithButton } from "../../components/Form";
 import LayoutAnimated from "../../components/wrapper/LayoutAnimated";
 import { getLinkById } from "../../utils/Firebase/services/shortenLinks";
 import { tShortenLink } from "../../utils/types/model";

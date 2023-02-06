@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import ErrorBoundary, { withBoundary } from "./wrapper/ErrorBoundary";
+import ErrorBoundary from "../wrapper/ErrorBoundary";
 
 interface iInputNumber {
   className?: string;

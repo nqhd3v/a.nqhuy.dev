@@ -1,9 +1,8 @@
 import { DocumentReference, onSnapshot } from "firebase/firestore";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect, useMemo, useReducer, useState } from "react";
-import { FormattedMessage, useIntl } from "react-intl";
-import ActivityAddOns from "../../../components/ActivityTracking/AddOns";
+import { useEffect, useMemo, useReducer } from "react";
+import { FormattedMessage } from "react-intl";
 import CheckedInParticipants from "../../../components/ActivityTracking/CheckedInParticipants";
 import CheckIn from "../../../components/ActivityTracking/CheckIn";
 import EditActivity from "../../../components/ActivityTracking/Edit";
@@ -16,6 +15,8 @@ import { getActivityByCode } from "../../../utils/Firebase/services/activityTrac
 import { getUsersByRefs } from "../../../utils/Firebase/services/user";
 import useMessage from "../../../utils/international";
 import { DocumentId, tActivityTracking, tDataTransformed, tUser } from "../../../utils/types/model";
+import ModalActivityAddOns from "../../../components/ActivityTracking/AddOns";
+import ActivityActions from "../../../components/ActivityTracking/Actions";
 
 type tActivityDetailState = {
   activity?: tDataTransformed<tActivityTracking>;
@@ -24,6 +25,7 @@ type tActivityDetailState = {
   checkInProgressModalVisible: boolean;
   participantsPath: string[];
   participantsInfo: Record<string, tDataTransformed<tUser>>;
+  addOnsModalVisible: boolean;
 }
 const ActivityTrackingDetail = () => {
   const router = useRouter();
@@ -31,20 +33,20 @@ const ActivityTrackingDetail = () => {
   const { user, isAuthenticating } = useFirebaseAuth();
 
   const [
-    { activity, fetching, editModalVisible, checkInProgressModalVisible, participantsInfo, participantsPath },
+    { activity, fetching, editModalVisible, checkInProgressModalVisible, participantsInfo, participantsPath, addOnsModalVisible },
     setState,
   ] = useReducer((p: tActivityDetailState, a: Partial<tActivityDetailState>) => {
     return { ...p, ...a};
   }, {
     activity: undefined,
     fetching: true,
-    editModalVisible: false,
-    checkInProgressModalVisible: false,
     participantsPath: [],
     participantsInfo: {},
+    editModalVisible: false,
+    checkInProgressModalVisible: false,
+    addOnsModalVisible: false,
   })
 
-  // New
   const activityCode = useMemo(() => router.isReady ? router.query.code as string : undefined, [router.isReady, router.query.code]);
   const activityParticipants = useMemo(
     () => !!activity && activity.data.participants || [],
@@ -54,6 +56,7 @@ const ActivityTrackingDetail = () => {
     () => !!activity && activity.data.participantsCheckedIn || [],
     [!!activity && (activity.data.participantsCheckedIn || []).map(p => p.path).join()]
   );
+
   const handleGetParticipantsInfo = async (users: DocumentReference[]) => {
     const usersNeedGetInfo = users.filter(u => !participantsPath.includes(u.path));
     const usersNeedGetInfoPath = usersNeedGetInfo.map(p => p.path);
@@ -142,13 +145,20 @@ const ActivityTrackingDetail = () => {
                 {activity ? (
                   <>
                     {' '}
-                    <FormattedMessage id="word.or" />
-                    {' '}
                     <span
                       className="font-bold underline cursor-pointer"
                       onClick={() => setState({ editModalVisible: true })}
                     >
                       <FormattedMessage id="word.edit-it" />
+                    </span>
+                    {', '}
+                    <FormattedMessage id="word.or" />
+                    {' '}
+                    <span
+                      className="font-bold underline cursor-pointer"
+                      onClick={() => setState({ addOnsModalVisible: true })}
+                    >
+                      <FormattedMessage id="activityTracking.addOns.add" />
                     </span>
                     {'.'}
                   </>
@@ -189,7 +199,7 @@ const ActivityTrackingDetail = () => {
             className="mb-5"
           />
 
-          <ActivityAddOns />
+          <ActivityActions data={activity?.data.actions} userMapping={participantsInfo} />
         </div>
       </LayoutAnimated>
       <Modal
@@ -231,6 +241,11 @@ const ActivityTrackingDetail = () => {
           isListening={activity?.data.checkInAvailable}
         />
       </Modal>
+      <ModalActivityAddOns
+        visible={addOnsModalVisible}
+        onClose={() => setState({ addOnsModalVisible: false })}
+        data={activity}
+      />
     </>
   )
 };

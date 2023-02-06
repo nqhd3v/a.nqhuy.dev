@@ -4,9 +4,7 @@ import { FormattedMessage } from "react-intl";
 import { joinActivityByCode } from "../../utils/Firebase/services/activityTrackings";
 import { tDataTransformed, tUser } from "../../utils/types/model";
 import { useFirebaseAuth } from "../Firebase/FirebaseAuthWrapper";
-import Form from "../Form";
-import useForm from "../Form/useForm";
-import InputWithButton from "../InputWithButton";
+import Form, { useForm, InputWithButton } from "../Form";
 import ErrorBoundary from "../wrapper/ErrorBoundary";
 
 interface iJoinActivityCard {

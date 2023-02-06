@@ -2,7 +2,7 @@ import { User } from "firebase/auth";
 import { addDoc, deleteDoc, DocumentData, getDoc, getDocs, query, QueryConstraint, QuerySnapshot, setDoc, WithFieldValue, DocumentReference, onSnapshot } from "firebase/firestore";
 import { firebaseColl, firebaseDoc } from ".";
 import { date2FsTimestamp } from "../func/mapping";
-import { DocumentId, tDataTransformed } from "../types/model";
+import { DocumentId, tDataTransformed, tFirestoreQueryItemData, tFirestoreQueryItemTransformedData } from "../types/model";
 
 // Firestore - Add document
 export const fsAdd = async <T extends any>(
@@ -135,6 +135,38 @@ export const fsReadOne = async <T extends any>(
   }
 };
 
+export const fsReadByRefs = async <T extends any>(refs: DocumentReference[]): Promise<tFirestoreQueryItemTransformedData<T>[]> => {
+  try { 
+    const promises = refs.map(async r => {
+      try {
+        const d = await getDoc(r);
+        if (!d.exists()) {
+          return {
+            isError: true,
+            errorMessageId: 'notfound',
+            _ref: r,
+          };
+        }
+        return {
+          _ref: r,
+          _id: r.id,
+          data: d.data() as T,
+        }
+      } catch (promiseErr) {
+        console.error(`[path = ${r.path}]: Error when read in promises:`, promiseErr);
+        return {
+          isError: true,
+          _ref: r,
+          errorMessageId: 'unknown',
+        };
+      }
+    });
+    return await Promise.all(promises) as tFirestoreQueryItemTransformedData<T>[];
+  } catch (err) {
+    throw err;
+  }
+}
+
 // Firestore - update document
 export const fsUpdate = async (
   data: DocumentData,
@@ -176,4 +208,12 @@ export const joinRefList = (root: DocumentReference[] = [], ...refs: DocumentRef
   const current = root.map(d => d.path);
   const refsNeedJoin = refs.filter(r => !current.includes(r.path));
   return [...root, ...refsNeedJoin];
+}
+
+export const isIncludedRef = (refCheck: DocumentReference, ...listRefs: DocumentReference[][]): boolean => {
+  const refPaths = listRefs.flat().map(d => d.path);
+  return refPaths.includes(refCheck.path);
+}
+export const includedRef = (refCheck: DocumentReference, ...listRefs: DocumentReference[][]): number => {
+  return listRefs.findIndex(list => list.map(l => l.path).includes(refCheck.path));
 }

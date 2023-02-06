@@ -29,7 +29,7 @@ const Modal: React.FC<iModal> = ({ children, visible, title, closable, backdropC
     <AnimatePresence mode="wait">
       {visible ? (<m.div
         onClick={() => backdropClosable ? onClose?.() : null}
-        className="fixed overflow-hidden top-0 left-0 w-full h-screen bg-dark/30 dark:bg-dark/30 backdrop-blur-sm flex justify-center items-center"
+        className="fixed overflow-hidden top-0 left-0 w-full h-screen bg-blue-100/30 dark:bg-dark/30 backdrop-blur-sm flex justify-center items-center"
         variants={modalVariant}
         initial="hidden"
         animate="visible"

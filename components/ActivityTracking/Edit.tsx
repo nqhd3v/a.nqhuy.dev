@@ -4,10 +4,7 @@ import { updateActivity } from "../../utils/Firebase/services/activityTrackings"
 import { fsTimestamp2Date } from "../../utils/func/mapping";
 import { DocumentId, tActivityTracking, tDataTransformed } from "../../utils/types/model";
 import Button from "../Button";
-import Form from "../Form";
-import useForm from "../Form/useForm";
-import Input from "../Input";
-import InputDateRange from "../InputDateRange";
+import Form, { useForm, Input, InputDateRange } from "../Form";
 
 interface iEditActivity {
   data?: tDataTransformed<tActivityTracking>;

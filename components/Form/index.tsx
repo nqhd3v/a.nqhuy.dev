@@ -1,8 +1,13 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { withBoundary } from "../wrapper/ErrorBoundary";
 import { isFormValidated } from "./func";
 import { tFormErrors, tFormRule, tFormValues } from "./types";
-import { iUseForm } from "./useForm";
+import useForm, { iUseForm } from "./useForm";
+import Input from "./FormInput";
+import ListInput from "./FormListInput";
+import InputDate from "./FormInputDate";
+import InputDateRange from "./FormInputDateRange";
+import InputWithButton from "./FormInputWithButton";
 
 export interface iForm {
   children: JSX.Element[] | JSX.Element;
@@ -200,6 +205,19 @@ const Form: React.FC<iForm> = ({
             disabled: disabled || childPropsDisabled,
           });
         }
+        if (childTypeName === "ListInput") {
+          if (!name) {
+            console.error('Form - ListInput - Input element required name prop:', childEle);
+            return childEle;
+          }
+          return React.cloneElement<any>(childEle, {
+            errors: formErr[name] || [],
+            onChange: (v: any) => handleSetField(name, v),
+            value: formData[name],
+            key: `${childTypeName}:${name}`,
+            disabled: disabled || childPropsDisabled,
+          });
+        }
         if (childTypeName === "Button" && childPropsType === "submit") {
           return React.cloneElement<any>(childEle, {
             key: `${childTypeName}:submit`,
@@ -213,3 +231,11 @@ const Form: React.FC<iForm> = ({
 };
 
 export default withBoundary<iForm>(Form);
+export {
+  useForm,
+  Input,
+  InputDate,
+  InputDateRange,
+  InputWithButton,
+  ListInput,
+}

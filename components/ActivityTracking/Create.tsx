@@ -4,9 +4,8 @@ import { FormattedMessage } from "react-intl";
 import { createActivity } from "../../utils/Firebase/services/activityTrackings";
 import { tDataTransformed, tUser } from "../../utils/types/model";
 import { useFirebaseAuth } from "../Firebase/FirebaseAuthWrapper";
-import Form from "../Form";
+import Form, { InputWithButton } from "../Form";
 import useForm from "../Form/useForm";
-import InputWithButton from "../InputWithButton";
 import { withBoundary } from "../wrapper/ErrorBoundary";
 
 interface iCreateActivityCard {

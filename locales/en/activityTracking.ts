@@ -19,8 +19,8 @@ const activityTracking = {
   'activityTracking.checkIn.run.finishing': 'finishing check-in',
   'activityTracking.checkIn.run.running': 'processing check-in',
   'activityTracking.checkIn.run.checking': 'checking-in for you',
-  'activityTracking.addOns.add': 'add somethings to your activity',
-  'activityTracking.addOns.': '',
+  'activityTracking.addOns.add': 'add some add-ons',
+  'activityTracking.addOns.poll.desc': 'Create a new poll to collect your team\'s ideas.',
   // ERROR =============================
   'error.activityTracking.html.no-view': 'Can not view this activity information because <b>it is not exist</b>!',
   'error.activityTracking.checkIn.activity-removed-while-checking-in': 'Someone removed this activity! Re-check and try again later!',
@@ -33,7 +33,13 @@ const activityTracking = {
   'exception.activityTracking.get-by-code.unknown': 'Unknown error when getting an activity by its code!',
   'exception.activityTracking.update.unknown': 'Unknown error when updating an activity!',
   'exception.activityTracking.join.unknown': 'Unknown error when joining an activity!',
-  'exception.activityTracking.notfound': 'Activity not found!'
+  'exception.activityTracking.notfound': 'Activity not found!',
+  // -> poll
+  'exception.activityTracking.addOns.poll.require-question': 'Please add your question!',
+  'exception.activityTracking.addOns.poll.require-options': 'Please add at least of option!',
+  'exception.activityTracking.addOns.poll.create.unknown': 'Unknown error when creating a new poll for the activity!',
+  'exception.activityTracking.addOns.poll.created_activity.update.unknown': 'Unknown error when re-updating activity after created a new poll!',
+  'exception.activityTracking.addOns.poll.select-option.unknown': 'Unknown error when select an option for poll',
 };
 
 export default activityTracking;
