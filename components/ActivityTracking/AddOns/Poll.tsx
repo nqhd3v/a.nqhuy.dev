@@ -64,7 +64,7 @@ const Poll: React.FC<iPoll> = ({ data, onDataChange, userMapping }) => {
             data={data.data.options[k]}
             selectable={pollOptionSelected < 0}
             onSelect={() => handleSelectOption(k)}
-            disabled={selecting || pollOptionSelected < 0}
+            disabled={selecting || pollOptionSelected >= 0}
             selected={pollOptionSelected === i}
             ratio={pollOptionSelectRatio[i]}
           />
@@ -106,7 +106,7 @@ const PollOption: React.FC<{
     >
       <div
         className={
-          "absolute left-0 top-0 bottom-0 right-auto w-full h-full origin-top-left -z-[1] " +
+          "absolute left-0 top-0 bottom-0 right-auto w-full h-full origin-top-left duration-300 -z-[1] " +
           (selected ? "bg-blue-300 dark:bg-blue-800 " : "bg-gray-300 dark:bg-gray-700 ")
         }
         style={{ transform: `scaleX(${ratio})`}}
